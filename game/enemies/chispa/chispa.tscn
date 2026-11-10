@@ -1,10 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/enemies/chispa/chispa.gd" id="1"]
 [ext_resource type="Texture2D" path="res://game/enemies/chispa/chispa.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/shared/sprites/shadow.png" id="3"]
-[ext_resource type="Script" path="res://game/parts/part.gd" id="5"]
-[ext_resource type="Resource" path="res://game/parts/data/mini_dron.tres" id="6"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 7.0
@@ -33,7 +31,6 @@ hp = 2
 bar_y = -16.0
 fx_scale = 2.0
 death_shake = 2.5
-drops = Array[ExtResource("5")]([ExtResource("6")])
 
 [node name="Shadow" type="Sprite2D" parent="."]
 position = Vector2(0, 15)

@@ -22,6 +22,7 @@ var _timer := 0.0
 var _cooldown := 0.0
 var _t := 0.0
 var _ram_home := 0.0
+var _ram_tween: Tween
 
 func _ready() -> void:
 	super()
@@ -42,7 +43,8 @@ func _physics_process(delta: float) -> void:
 			if _cooldown <= 0.0 and global_position.distance_to(_player.global_position) < SLAM_RANGE:
 				_state = State.WINDUP
 				_timer = SLAM_WINDUP
-				create_tween().tween_property(ram, "position:y", _ram_home - RAM_LIFT, SLAM_WINDUP)
+				_ram_tween = create_tween()
+				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, SLAM_WINDUP)
 				# SFX: charge
 		State.WINDUP:
 			_telegraph(SLAM_RADIUS, 1.0 - _timer / SLAM_WINDUP)
@@ -61,10 +63,12 @@ func _slam() -> void:
 	_state = State.RECOVER
 	_timer = SLAM_RECOVER
 	_cooldown = SLAM_COOLDOWN
-	var tw := create_tween()
-	tw.tween_property(ram, "position:y", _ram_home + RAM_DROP, RAM_SLAM_TIME)
-	tw.tween_property(ram, "position:y", _ram_home, SLAM_RECOVER)
-	_juice(&"shake", [SLAM_SHAKE])
+	if _ram_tween:
+		_ram_tween.kill()
+	_ram_tween = create_tween()
+	_ram_tween.tween_property(ram, "position:y", _ram_home + RAM_DROP, RAM_SLAM_TIME)
+	_ram_tween.tween_property(ram, "position:y", _ram_home, SLAM_RECOVER)
+	Juice.shake(SLAM_SHAKE)
 	var dust := DUST.instantiate()
 	dust.global_position = global_position
 	get_tree().current_scene.add_child.call_deferred(dust)

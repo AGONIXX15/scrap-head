@@ -32,6 +32,8 @@ func _on_body_entered(_body: Node) -> void:
 	_impact(false)
 
 func _on_area_entered(area: Area2D) -> void:
+	if is_queued_for_deletion():
+		return
 	var enemy := area.get_parent()
 	if enemy in _hit:
 		return

@@ -22,6 +22,10 @@ var _done := false
 func _ready() -> void:
 	add_to_group("spawn_warning")
 
+func _exit_tree() -> void:
+	if not _done and is_instance_valid(enemy):
+		enemy.free()
+
 func _process(delta: float) -> void:
 	if _done:
 		return
@@ -40,6 +44,7 @@ func _draw() -> void:
 
 func _spawn() -> void:
 	_done = true
+	remove_from_group("spawn_warning")
 	queue_redraw()
 	enemy.position = position
 	enemy.scale = Vector2.ONE * START_SCALE
