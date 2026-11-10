@@ -1,9 +1,39 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=14 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/floor.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/arena/floor_atlas.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/arena/decor.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/arena/border.png" id="6"]
+[ext_resource type="Script" path="res://scripts/arena.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="4"]
+
+[sub_resource type="TileSetAtlasSource" id="atlas"]
+texture = ExtResource("2")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+
+[sub_resource type="TileSet" id="tileset"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("atlas")
+
+[sub_resource type="Shader" id="vignette"]
+code = "shader_type canvas_item;
+void fragment() {
+	float d = length((UV - 0.5) * vec2(1.0, 0.9));
+	COLOR = vec4(0.04, 0.02, 0.09, smoothstep(0.38, 0.85, d) * 0.6);
+}"
+
+[sub_resource type="ShaderMaterial" id="vignette_mat"]
+shader = SubResource("vignette")
 
 [sub_resource type="RectangleShape2D" id="top"]
 size = Vector2(1480, 100)
@@ -14,29 +44,37 @@ size = Vector2(100, 920)
 [node name="Main" type="Node2D"]
 script = ExtResource("4")
 
-[node name="Floor" type="Sprite2D" parent="."]
-texture_repeat = 2
-texture = ExtResource("2")
+[node name="Ambient" type="CanvasModulate" parent="."]
+color = Color(0.82, 0.86, 0.97, 1)
+
+[node name="Floor" type="TileMapLayer" parent="."]
+tile_set = SubResource("tileset")
+script = ExtResource("7")
+
+[node name="Decor" type="Sprite2D" parent="."]
+texture = ExtResource("5")
 centered = false
-region_enabled = true
-region_rect = Rect2(0, 0, 1280, 720)
+
+[node name="Border" type="Sprite2D" parent="."]
+texture = ExtResource("6")
+centered = false
 
 [node name="Walls" type="StaticBody2D" parent="."]
 
 [node name="Top" type="CollisionShape2D" parent="Walls"]
-position = Vector2(640, -50)
+position = Vector2(640, -18)
 shape = SubResource("top")
 
 [node name="Bottom" type="CollisionShape2D" parent="Walls"]
-position = Vector2(640, 770)
+position = Vector2(640, 746)
 shape = SubResource("top")
 
 [node name="Left" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-50, 360)
+position = Vector2(-34, 360)
 shape = SubResource("side")
 
 [node name="Right" type="CollisionShape2D" parent="Walls"]
-position = Vector2(1330, 360)
+position = Vector2(1314, 360)
 shape = SubResource("side")
 
 [node name="Player" parent="." instance=ExtResource("3")]
@@ -47,3 +85,13 @@ position = Vector2(640, 360)
 [node name="SpawnTimer" type="Timer" parent="."]
 wait_time = 1.2
 autostart = true
+
+[node name="Vignette" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Rect" type="ColorRect" parent="Vignette"]
+material = SubResource("vignette_mat")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
