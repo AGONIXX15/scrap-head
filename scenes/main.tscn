@@ -1,7 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/floor.png" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="4"]
 
 [sub_resource type="RectangleShape2D" id="top"]
 size = Vector2(1480, 100)
@@ -10,6 +12,7 @@ size = Vector2(1480, 100)
 size = Vector2(100, 920)
 
 [node name="Main" type="Node2D"]
+script = ExtResource("4")
 
 [node name="Floor" type="Sprite2D" parent="."]
 texture_repeat = 2
@@ -38,3 +41,9 @@ shape = SubResource("side")
 
 [node name="Player" parent="." instance=ExtResource("3")]
 position = Vector2(640, 360)
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="SpawnTimer" type="Timer" parent="."]
+wait_time = 1.2
+autostart = true
