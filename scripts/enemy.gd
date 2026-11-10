@@ -1,66 +1,75 @@
-extends CharacterBody2D
+extends EnemyBase
 
-const EXPLOSION := preload("res://scenes/explosion.tscn")
-const PICKUP := preload("res://scenes/pickup.tscn")
-const PARTS: Array[Part] = [preload("res://parts/visor_torreta.tres"), preload("res://parts/taladro.tres"),
-		preload("res://parts/orugas_tanque.tres"), preload("res://parts/mini_dron.tres")]
-const DROP_CHANCE := 0.25
-const KNOCKBACK := 140.0
-const KNOCK_DECAY := 600.0
 const WALK_FPS := 8.0
-const FLASH_COLOR := Color(4, 4, 4)
-const FLASH_TIME := 0.1
+const OPEN_FRAME := 0
+const CLOSED_FRAME := 2
+const LUNGE_RANGE := 90.0
+const WINDUP_TIME := 0.5
+const LUNGE_SPEED := 300.0
+const LUNGE_TIME := 0.3
+const RECOVER_TIME := 0.7
+const TREMBLE := 1.0
+const BLINK_HZ := 14.0
+const BLINK_DIM := 0.3
+const BLINK_BRIGHT := 2.0
+const PUPIL_REACH := 1.5
 
-@export var speed := 60.0
-@export var hp := 3
-@export var damage := 1
+enum State { CHASE, WINDUP, LUNGE, RECOVER }
 
-@onready var sprite: Sprite2D = $Sprite
-@onready var hitbox: Area2D = $Hitbox
+@onready var pupil: Sprite2D = $Sprite/Pupil
+@onready var light: PointLight2D = $Sprite/Light
 
-var _player: Node2D
-var _knock := Vector2.ZERO
+var _state := State.CHASE
+var _timer := 0.0
 var _t := 0.0
+var _lunge_dir := Vector2.ZERO
+var _eye_home := Vector2.ZERO
+var _light_energy := 0.0
 
 func _ready() -> void:
-	_player = get_tree().get_first_node_in_group("player")
+	super()
+	_eye_home = pupil.position
+	_light_energy = light.energy
 
 func _physics_process(delta: float) -> void:
 	if not is_instance_valid(_player):
 		return
 	var dir := global_position.direction_to(_player.global_position)
 	_knock = _knock.move_toward(Vector2.ZERO, KNOCK_DECAY * delta)
-	velocity = dir * speed + _knock
+	pupil.position = _eye_home + dir * PUPIL_REACH
+	_timer -= delta
+	velocity = _knock
+	match _state:
+		State.CHASE:
+			velocity += dir * speed
+			_t += delta * WALK_FPS
+			sprite.frame = int(_t) % sprite.hframes
+			if global_position.distance_to(_player.global_position) < LUNGE_RANGE:
+				_state = State.WINDUP
+				_timer = WINDUP_TIME
+				# SFX: charge
+		State.WINDUP:
+			sprite.frame = OPEN_FRAME
+			sprite.position = Vector2(randf_range(-TREMBLE, TREMBLE), randf_range(-TREMBLE, TREMBLE))
+			_set_eye(int(_timer * BLINK_HZ) % 2 == 0)
+			if _timer <= 0.0:
+				_lunge_dir = dir
+				_state = State.LUNGE
+				_timer = LUNGE_TIME
+				sprite.position = Vector2.ZERO
+				_set_eye(true)
+		State.LUNGE:
+			velocity = _lunge_dir * LUNGE_SPEED
+			if _timer <= 0.0:
+				_state = State.RECOVER
+				_timer = RECOVER_TIME
+				sprite.frame = CLOSED_FRAME
+		State.RECOVER:
+			if _timer <= 0.0:
+				_state = State.CHASE
 	move_and_slide()
-	_t += delta * WALK_FPS
-	sprite.frame = int(_t) % sprite.hframes
-	if dir.x != 0.0:
-		sprite.flip_h = dir.x < 0.0
-	for body in hitbox.get_overlapping_bodies():
-		if body.is_in_group("player"):
-			body.take_damage(damage)
+	_touch()
 
-func hit(amount: int, from_dir := Vector2.ZERO) -> void:
-	if hp <= 0:
-		return  # dos balas en el mismo frame
-	hp -= amount
-	if hp <= 0:
-		# SFX: explode
-		_die()
-		return
-	# SFX: hit
-	_knock = from_dir * KNOCKBACK
-	sprite.modulate = FLASH_COLOR
-	create_tween().tween_property(sprite, "modulate", Color.WHITE, FLASH_TIME)
-
-func _die() -> void:
-	var scene := get_tree().current_scene
-	var fx := EXPLOSION.instantiate()
-	fx.global_position = global_position
-	scene.add_child.call_deferred(fx)
-	if randf() < DROP_CHANCE:
-		var p := PICKUP.instantiate()
-		p.part = PARTS.pick_random()
-		p.global_position = global_position
-		scene.add_child.call_deferred(p)
-	queue_free()
+func _set_eye(bright: bool) -> void:
+	pupil.visible = bright
+	light.energy = _light_energy * (BLINK_BRIGHT if bright else BLINK_DIM)

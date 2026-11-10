@@ -53,10 +53,13 @@ Sinergias por set: equipar varias piezas del mismo set unifica su pintura y da u
 Sierras, taladros, cañones, drones, imanes, lanzallamas. La versión inicial incluye un cañón básico.
 
 ## Enemigos
-- Robot oxidado: persigue y daña al contacto.
-- Dron militar: rápido y frágil.
-- Torreta: estática, dispara.
-- Tanque / máquina gigante: lento y resistente; la máquina gigante es el jefe.
+Todos heredan de `EnemyBase` (vida, flash, empuje, barra de vida tras recibir daño, drop). Con `elite = true`: dorado, vida x3, más grande y drop garantizado.
+- Oxidado: persigue; a corta distancia se detiene, tiembla y su ojo parpadea, luego embiste en línea recta y se recupera. Suelta Taladro.
+- Chispa: dron kamikaze rápido, vuela en zigzag y explota en área (con círculo de aviso) al llegar o al morir. Suelta Mini dron.
+- Remachadora: torreta fija; carga un láser de aviso y dispara una ráfaga de remaches. Mucha vida. Suelta Visor de torreta.
+- Prensa: tanque élite lento y muy resistente; golpe de área telegrafiado con círculo rojo, temblor y polvo. Suelta Orugas siempre.
+- Dron militar: rápido y frágil (pendiente).
+- Máquina gigante: jefe de la oleada 5 (pendiente).
 
 ## Nivel
 - 5 oleadas con temporizador y dificultad creciente; la oleada 5 termina con el jefe "máquina gigante".
