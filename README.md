@@ -11,7 +11,8 @@ En un planeta abandonado, un pequeño robot hecho de piezas recicladas sobrevive
 | Acción | Teclas |
 |---|---|
 | Moverse | WASD o flechas |
-| Disparar | Automático al enemigo más cercano |
+| Apuntar | Mouse |
+| Disparar | Clic izquierdo (mantener) |
 
 ## Abrir y ejecutar
 

@@ -15,15 +15,15 @@ Como jugador quiero mover al robot con WASD o flechas para explorar la arena.
 
 ### HU-02 Robots oxidados
 Como jugador quiero que robots oxidados me persigan y me dañen al contacto para sentir amenaza.
-- [ ] Los enemigos aparecen en la arena y se dirigen al jugador.
-- [ ] Al tocar al jugador le quitan vida, con un breve periodo de invulnerabilidad.
-- [ ] Los enemigos mueren al recibir suficiente daño.
+- [x] Los enemigos aparecen en la arena y se dirigen al jugador.
+- [x] Al tocar al jugador le quitan vida, con un breve periodo de invulnerabilidad.
+- [x] Los enemigos mueren al recibir suficiente daño.
 
-### HU-03 Disparo automático
-Como jugador quiero disparar automáticamente al enemigo más cercano para centrarme en esquivar.
-- [ ] El arma apunta al enemigo más cercano en rango.
-- [ ] Dispara a intervalo fijo mientras haya objetivo.
-- [ ] Los proyectiles dañan y desaparecen al impactar o salir de la arena.
+### HU-03 Disparo manual
+Como jugador quiero apuntar con el mouse y disparar con clic para controlar cada tiro.
+- [x] El robot mira y dispara hacia el cursor.
+- [x] Mantener clic izquierdo dispara con una cadencia fija.
+- [x] Los proyectiles dañan y desaparecen al impactar o salir de la arena.
 
 ### HU-04 HUD de vida y derrota
 Como jugador quiero ver mi vida para saber cuándo estoy en peligro.
