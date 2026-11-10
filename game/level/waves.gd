@@ -3,7 +3,9 @@ extends Node
 signal wave_started(n: int)
 signal wave_cleared(n: int)
 signal all_waves_cleared
+signal tick(dt: float)
 
+const WORKSHOP := preload("res://game/workshop/workshop.tscn")
 const WARNING := preload("res://game/level/spawn_warning.tscn")
 const ARENA := Vector2(1280, 720)
 const MARGIN := 48.0
@@ -11,10 +13,10 @@ const MAX_ENEMIES := 40
 const MIN_DIST := 200.0
 const SPAWN_TRIES := 8
 const INTERIOR_MIN_DIST := 280.0
-const INTERIOR := ["res://game/enemies/remachadora/remachadora.tscn"]
 const OXIDADO := "res://game/enemies/oxidado/oxidado.tscn"
 const SPARK := "res://game/enemies/chispa/chispa.tscn"
 const RIVETER := "res://game/enemies/remachadora/remachadora.tscn"
+const INTERIOR := [RIVETER]
 const PRESS := "res://game/enemies/prensa/prensa.tscn"
 # time: duración (s), interval: segundos entre tandas, burst: enemigos por tanda, cap: tope de vivos
 const WAVES := [
@@ -27,8 +29,7 @@ const WAVES := [
 const ELITE_FROM_WAVE := 3
 const ELITE_CHANCE := 0.12
 const CHAIN_DELAY := 0.08
-const LETHAL := 9999
-const BREAK_TIME := 4.0
+const SCRAP_PULL_TIME := 2.5
 
 const BANNER_SIZE := 48
 const BANNER_OUTLINE := 10
@@ -63,6 +64,14 @@ func _ready() -> void:
 	clock.hide()
 	_run()
 
+func _process(delta: float) -> void:
+	tick.emit(delta)
+
+func _wait(t: float) -> void:
+	var tw := create_tween()
+	tw.tween_interval(t)
+	await tw.finished
+
 func _style(l: Label, size: int, outline: int) -> void:
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", AMBER)
@@ -87,8 +96,7 @@ func _play(i: int) -> void:
 	clock.show()
 	var acc := 0.0
 	while _left > 0.0:
-		await get_tree().process_frame
-		var dt := get_process_delta_time()
+		var dt: float = await tick
 		_left -= dt
 		acc += dt
 		clock.text = str(ceili(maxf(_left, 0.0)))
@@ -102,11 +110,17 @@ func _play(i: int) -> void:
 	_show("¡OLEADA SUPERADA!", AMBER)
 	for e in enemies.get_children():
 		if is_instance_valid(e):
-			e.hit(LETHAL, Vector2.ZERO)
-		await get_tree().create_timer(CHAIN_DELAY).timeout
+			e.sweep()
+		await _wait(CHAIN_DELAY)
 	wave_cleared.emit(i + 1)
 	if i < WAVES.size() - 1:
-		await get_tree().create_timer(BREAK_TIME).timeout
+		get_tree().call_group("scrap", "attract")
+		await _wait(SCRAP_PULL_TIME)
+		var workshop := WORKSHOP.instantiate()
+		workshop.player = player
+		workshop.wave = i + 1
+		add_child(workshop)
+		await workshop.closed
 
 func _spawn(wave: int) -> void:
 	if enemies.get_child_count() + get_tree().get_nodes_in_group("spawn_warning").size() >= _cap:

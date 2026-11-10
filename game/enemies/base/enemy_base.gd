@@ -1,12 +1,14 @@
 class_name EnemyBase extends CharacterBody2D
 
 const EXPLOSION := preload("res://game/fx/explosion.tscn")
-const PICKUP := preload("res://game/parts/pickup.tscn")
+const SCRAP := preload("res://game/parts/scrap/scrap.tscn")
 const KNOCKBACK := 140.0
 const KNOCK_DECAY := 600.0
 const FLASH_COLOR := Color(4, 4, 4)
 const FLASH_TIME := 0.1
 const ELITE_HP_MULT := 3
+const ELITE_SCRAP_MULT := 3
+const SCRAP_SPREAD := 10.0
 const ELITE_SCALE := 1.25
 const ELITE_COLOR := Color(1.6, 1.3, 0.5)
 const BAR_SIZE := Vector2(20, 2)
@@ -22,8 +24,7 @@ const WARN_POINTS := 48
 @export var hp := 3
 @export var damage := 1
 @export var elite := false
-@export_range(0.0, 1.0) var drop_chance := 0.25
-@export var drops: Array[Part] = []
+@export var scrap_value := 1
 @export var knock_scale := 1.0
 @export var bar_y := -22.0
 @export var fx_scale := 1.0
@@ -40,12 +41,13 @@ var _bar := Node2D.new()
 var _warn := Node2D.new()
 var _warn_radius := 0.0
 var _warn_fill := 0.0
+var _dead := false
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
 	if elite:
 		hp *= ELITE_HP_MULT
-		drop_chance = 1.0
+		scrap_value *= ELITE_SCRAP_MULT
 		scale = Vector2.ONE * ELITE_SCALE
 		_tint = ELITE_COLOR
 		sprite.modulate = _tint
@@ -63,7 +65,7 @@ func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	if hp <= 0:
 		return  # dos balas en el mismo frame
 	hp -= amount
-	_juice(&"damage_number", [global_position + Vector2(0.0, bar_y), amount])
+	Juice.damage_number(global_position + Vector2(0.0, bar_y), amount)
 	_bar.visible = true
 	_bar.queue_redraw()
 	if hp <= 0:
@@ -75,20 +77,28 @@ func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	sprite.modulate = FLASH_COLOR
 	create_tween().tween_property(sprite, "modulate", _tint, FLASH_TIME)
 
-func _die() -> void:
+func sweep() -> void:
+	hp = 0
+	_die(false)
+
+func _die(juice := true) -> void:
+	if _dead:
+		return
+	_dead = true
+	set_physics_process(false)
 	_on_death()
 	var scene := get_tree().current_scene
 	var fx := EXPLOSION.instantiate()
 	fx.global_position = global_position
 	fx.scale = Vector2.ONE * fx_scale
 	scene.add_child.call_deferred(fx)
-	if not drops.is_empty() and randf() < drop_chance:
-		var p := PICKUP.instantiate()
-		p.part = drops.pick_random()
-		p.global_position = global_position
-		scene.add_child.call_deferred(p)
-	_juice(&"hitstop")
-	_juice(&"shake", [death_shake])
+	for i in scrap_value:
+		var b := SCRAP.instantiate()
+		b.global_position = global_position + Vector2.from_angle(randf() * TAU) * randf_range(0.0, SCRAP_SPREAD)
+		scene.add_child.call_deferred(b)
+	if juice:
+		Juice.hitstop()
+		Juice.shake(death_shake)
 	queue_free()
 
 func _on_death() -> void:
@@ -103,11 +113,6 @@ func _telegraph(radius: float, fill := 0.0) -> void:
 	_warn_radius = radius
 	_warn_fill = fill
 	_warn.queue_redraw()
-
-func _juice(fn: StringName, args := []) -> void:
-	var j := get_node_or_null("/root/Juice")
-	if j:
-		j.callv(fn, args)
 
 func _draw_bar() -> void:
 	var origin := Vector2(-BAR_SIZE.x * 0.5, bar_y)
