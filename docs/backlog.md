@@ -51,7 +51,7 @@ Como jugador quiero que las piezas que equipo se vean en mi robot y cambien mis 
 - [x] Equipar da feedback: flash blanco, squash, chispas y texto flotante con el nombre.
 - [x] El cuerpo base cambia (oxidado, reparado, pulido) según las piezas equipadas.
 - [x] Hay 4 piezas de ejemplo: Visor de torreta, Taladro, Orugas de tanque y Mini dron escolta.
-- [x] Los enemigos sueltan una pieza al azar con 25% de probabilidad y se equipa al tocarla.
+- [x] Las piezas se obtienen en el taller (HU-11), no del suelo.
 - [ ] Resto del catálogo (ver GDD, sección Piezas).
 
 ### HU-16 Animaciones
@@ -67,7 +67,21 @@ Como jugador quiero personajes y efectos animados para que el juego se vea vivo.
 Como jugador quiero oleadas con temporizador y dificultad creciente para sentir progresión.
 - [x] Hay 5 oleadas con temporizador visible.
 - [x] Cada oleada genera más enemigos o más fuertes.
-- [x] Al acabar el tiempo se limpian los enemigos y se pasa a una pausa entre oleadas (el taller llega con HU-11).
+- [x] Al acabar el tiempo se limpian los enemigos y se pasa al taller (HU-11).
+
+### HU-10 Recoger chatarra
+Como jugador quiero recoger chatarra de los enemigos para comprar mejoras.
+- [x] Los enemigos sueltan tornillos al morir (más los élites y los fuertes).
+- [x] El tornillo salta al aparecer, se imanta al acercarse y parpadea antes de desaparecer.
+- [x] El jugador acumula `scrap` y emite `scrap_changed` (HUD pendiente).
+
+### HU-11 Taller de piezas
+Como jugador quiero un taller entre oleadas para armar mi robot.
+- [x] El taller aparece al terminar cada oleada (menos la última) y pausa el juego.
+- [x] Ofrece 3 piezas al azar con rareza y diferencias de stats frente a la pieza actual.
+- [x] Una vista previa del robot muestra la pieza al pasar el mouse por una tarjeta.
+- [x] Elegir (clic o teclas 1/2/3) equipa la pieza con efecto y empieza la siguiente oleada.
+- [x] Re-roll con coste creciente en tornillos y opción de saltar a cambio de tornillos.
 
 ## Épica 2: Estructura de partida (Entrega 2)
 
@@ -81,19 +95,6 @@ Como jugador quiero distintos tipos de enemigos para variar mi estrategia.
 - [ ] Dron rápido y frágil.
 - [ ] Torreta estática que dispara al jugador.
 - [ ] Tanque lento y resistente.
-
-## Épica 3: Progresión y piezas (Entrega 2)
-
-### HU-10 Recoger chatarra
-Como jugador quiero recoger chatarra de los enemigos para comprar mejoras.
-- [ ] Los enemigos sueltan chatarra al morir.
-- [ ] La chatarra se recoge al acercarse y se muestra en el HUD.
-
-### HU-11 Taller de piezas
-Como jugador quiero un taller entre oleadas para modificar mi robot.
-- [ ] El taller aparece al terminar cada oleada.
-- [ ] Ofrece piezas con coste en chatarra.
-- [ ] Equipar una pieza cambia stats y apariencia del robot.
 
 ## Épica 4: Final y pulido (Entrega 2)
 
