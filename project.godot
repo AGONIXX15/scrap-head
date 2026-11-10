@@ -3,7 +3,11 @@ config_version=5
 [application]
 
 config/name="Scrap Head"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/intro.tscn"
+
+[autoload]
+
+Juice="*res://scripts/juice.gd"
 
 [display]
 
@@ -19,6 +23,7 @@ window/stretch/mode="canvas_items"
 2d_physics/layer_2="player"
 2d_physics/layer_3="enemies"
 2d_physics/layer_4="bullets"
+2d_physics/layer_5="hurtbox"
 
 [input]
 
