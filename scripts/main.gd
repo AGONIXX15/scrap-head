@@ -2,7 +2,7 @@ extends Node2D
 
 const ENEMY := preload("res://scenes/enemy.tscn")
 const ARENA := Vector2(1280, 720)
-const MARGIN := 16.0
+const MARGIN := 48.0
 const MAX_ENEMIES := 40
 const MIN_DIST := 200.0
 
@@ -17,7 +17,7 @@ func _spawn() -> void:
 		return
 	var pos := _perimeter_point()
 	if pos.distance_to(player.global_position) < MIN_DIST:
-		return  # se salta este tick; el siguiente probará otro punto
+		return
 	var e := ENEMY.instantiate()
 	e.position = pos
 	enemies.add_child(e)
