@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/part.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/part_drill.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+name = "Taladro"
+slot = "arm"
+texture = ExtResource("2")
+stats = {"pierce": 2}
+
