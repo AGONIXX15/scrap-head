@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 signal hp_changed(hp: int, max_hp: int)
 signal parts_changed(parts: Dictionary)
+signal scrap_changed(n: int)
 signal died
 
 const BULLET := preload("res://game/weapons/bullet/bullet.tscn")
@@ -83,6 +84,7 @@ var pierce: int
 var auto_aim: bool
 var hp: int
 var parts := {}
+var scrap := 0
 
 var _extras := {}
 var _clock := 0.0
@@ -170,6 +172,11 @@ func equip(part: Part) -> void:
 	sparks.restart()
 	_float_text("¡%s!" % part.name)
 	parts_changed.emit(parts)
+
+func add_scrap(n: int) -> void:
+	# SFX: pickup
+	scrap += n
+	scrap_changed.emit(scrap)
 
 func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
 	var best := max_dist

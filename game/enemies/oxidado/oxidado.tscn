@@ -1,11 +1,9 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game/enemies/oxidado/oxidado.gd" id="1"]
 [ext_resource type="Texture2D" path="res://game/enemies/oxidado/sprites/oxidado.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/shared/sprites/shadow.png" id="3"]
 [ext_resource type="Texture2D" path="res://game/enemies/oxidado/sprites/pupila.png" id="4"]
-[ext_resource type="Script" path="res://game/parts/part.gd" id="5"]
-[ext_resource type="Resource" path="res://game/parts/data/taladro.tres" id="6"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 11.0
@@ -33,7 +31,6 @@ collision_layer = 4
 collision_mask = 5
 script = ExtResource("1")
 bar_y = -26.0
-drops = Array[ExtResource("5")]([ExtResource("6")])
 
 [node name="Shadow" type="Sprite2D" parent="."]
 position = Vector2(0, 17)

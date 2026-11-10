@@ -1,7 +1,7 @@
 # Scrap Head: Game Design Document
 
 ## Concepto
-Arena survival 2D top-down. Un pequeño robot de chatarra sobrevive en un planeta abandonado frente a máquinas defectuosas. Cada enemigo suelta piezas que modifican físicamente al robot.
+Arena survival 2D top-down. Un pequeño robot de chatarra sobrevive en un planeta abandonado frente a máquinas defectuosas. Cada enemigo suelta tornillos y el taller ofrece piezas que modifican físicamente al robot.
 
 ## Pilares
 - Supervivencia simple de leer: moverse y esquivar; el arma dispara sola.
@@ -9,13 +9,13 @@ Arena survival 2D top-down. Un pequeño robot de chatarra sobrevive en un planet
 - Partidas cortas y completas, con inicio y fin claros.
 
 ## Core loop
-Sobrevivir a la oleada, recoger chatarra y piezas, visitar el taller, equipar y pasar a la siguiente oleada.
+Oleada → taller → oleada. Sobrevivir, recoger los tornillos que sueltan los enemigos y, al terminar la oleada, elegir en el taller una de 3 piezas (o re-roll / saltar por tornillos) para armarte tú mismo; luego empieza la siguiente.
 
 ## Mecánicas
 - Movimiento 8 direcciones, disparo manual apuntando con el mouse.
 - Vida; derrota al llegar a 0.
-- Chatarra: moneda que sueltan los enemigos.
-- Piezas: se compran/eligen en el taller; modifican stats (velocidad, daño, vida, cadencia) y sprite.
+- Chatarra (tornillos): moneda que sueltan los enemigos; se imanta al jugador. Se gasta en re-roll del taller.
+- Piezas: se eligen en el taller entre 3 ofertas; modifican stats (velocidad, daño, vida, cadencia) y sprite.
 
 ## Piezas
 Cada pieza ocupa una ranura, cambia stats y se ve en el robot. Rarezas: chatarra, reparada, legendaria. Implementadas hoy: Visor de torreta, Taladro, Orugas de tanque y Mini dron escolta (ver [guía](piezas.md)). La ranura "hombro" aún no tiene capa en el robot.
@@ -63,7 +63,7 @@ Todos heredan de `EnemyBase` (vida, flash, empuje, barra de vida tras recibir da
 
 ## Nivel
 - 5 oleadas con temporizador y dificultad creciente; la oleada 5 termina con el jefe "máquina gigante".
-- Taller de piezas entre oleadas.
+- Taller de piezas tras cada oleada (no tras la última).
 - Arena única de fábrica abandonada, 1280x720.
 
 ## Victoria y derrota

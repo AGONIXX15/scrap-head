@@ -4,7 +4,7 @@ Arena survival 2D top-down con robots, al estilo Brotato.
 
 ## Pitch
 
-En un planeta abandonado, un pequeño robot hecho de piezas recicladas sobrevive entre máquinas defectuosas. Cada enemigo derrotado suelta piezas que puedes montarte encima: cambian tus estadísticas y también tu aspecto. Sobrevive a 5 oleadas y derrota a la máquina gigante.
+En un planeta abandonado, un pequeño robot hecho de piezas recicladas sobrevive entre máquinas defectuosas. Cada enemigo derrotado suelta tornillos y, tras cada oleada, el taller te deja elegir una pieza para montarte encima: cambian tus estadísticas y también tu aspecto. Sobrevive a 5 oleadas y derrota a la máquina gigante.
 
 ## Controles
 
