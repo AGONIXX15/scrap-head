@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/floor.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3"]
+
+[sub_resource type="RectangleShape2D" id="top"]
+size = Vector2(1480, 100)
+
+[sub_resource type="RectangleShape2D" id="side"]
+size = Vector2(100, 920)
+
+[node name="Main" type="Node2D"]
+
+[node name="Floor" type="Sprite2D" parent="."]
+texture_repeat = 2
+texture = ExtResource("2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1280, 720)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="Top" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, -50)
+shape = SubResource("top")
+
+[node name="Bottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, 770)
+shape = SubResource("top")
+
+[node name="Left" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-50, 360)
+shape = SubResource("side")
+
+[node name="Right" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1330, 360)
+shape = SubResource("side")
+
+[node name="Player" parent="." instance=ExtResource("3")]
+position = Vector2(640, 360)
