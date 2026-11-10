@@ -44,6 +44,25 @@ Como jugador quiero oír y ver el resultado de mis acciones para tener retroalim
 - [ ] Efecto visual al morir un enemigo.
 - [ ] Música de fondo en bucle.
 
+### HU-15 Piezas visibles
+Como jugador quiero que las piezas que equipo se vean en mi robot y cambien mis stats para sentir progreso.
+- [x] El robot es modular: capas piernas, cuerpo, espalda, brazo y cabeza.
+- [x] Equipar una pieza reemplaza la de su ranura y recalcula velocidad, vida máxima, cadencia, daño, perforación y autoapuntado.
+- [x] Equipar da feedback: flash blanco, squash, chispas y texto flotante con el nombre.
+- [x] El cuerpo base cambia (oxidado, reparado, pulido) según las piezas equipadas.
+- [x] Hay 4 piezas de ejemplo: Visor de torreta, Taladro, Orugas de tanque y Mini dron escolta.
+- [x] Los enemigos sueltan una pieza al azar con 25% de probabilidad y se equipa al tocarla.
+- [ ] Resto del catálogo (ver GDD, sección Piezas).
+
+### HU-16 Animaciones
+Como jugador quiero personajes y efectos animados para que el juego se vea vivo.
+- [x] Robot con piernas animadas (idle y caminar), brazo que rota hacia el mouse con retroceso y fogonazo.
+- [x] Enemigo con caminar tambaleante, ojo que pulsa, flash y retroceso al ser golpeado.
+- [x] Explosión de 6 frames con tuercas y chispas al morir un enemigo.
+- [x] Bala con 2 frames de brillo y chispas al impactar.
+- [x] Squash al empezar a moverse y polvo al caminar.
+- [x] Al morir, el robot se desarma antes de reiniciar.
+
 ## Épica 2: Estructura de partida (Entrega 2)
 
 ### HU-07 Pantalla de título

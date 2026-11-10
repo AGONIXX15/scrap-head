@@ -24,6 +24,7 @@ En un planeta abandonado, un pequeño robot hecho de piezas recicladas sobrevive
 
 ```
 assets/sprites/   sprites PNG generados
+parts/            piezas equipables (.tres)
 scenes/           escenas (.tscn)
 scripts/          scripts GDScript
 tools/            scripts para generar arte y audio
@@ -36,6 +37,7 @@ Regenerar sprites: `python3 tools/gen_sprites.py` (requiere Pillow).
 
 - [GDD](docs/GDD.md)
 - [Backlog](docs/backlog.md)
+- [Cómo crear una pieza](docs/piezas.md)
 
 ## Créditos
 
