@@ -10,4 +10,5 @@ name = "Orugas de tanque"
 slot = "legs"
 texture = ExtResource("2")
 stats = {"max_hp": 2, "speed": -15.0}
-
+rarity = 1
+description = "Lento pero blindado. Pisa fuerte y aguanta más."

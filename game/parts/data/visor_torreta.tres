@@ -10,4 +10,5 @@ name = "Visor de torreta"
 slot = "head"
 texture = ExtResource("2")
 stats = {"range": 80.0, "fire_rate": -0.05}
-
+rarity = 0
+description = "Ves más lejos y disparas más rápido. Cero sutileza."

@@ -11,3 +11,5 @@ slot = "back"
 texture = ExtResource("2")
 stats = {}
 scene = ExtResource("3")
+rarity = 1
+description = "Un dron que te sigue y dispara por su cuenta. No pide aumento."

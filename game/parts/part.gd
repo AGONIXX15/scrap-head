@@ -8,6 +8,8 @@ const FRAME_SIZE := 32
 
 @export var name: String
 @export_enum("head", "arm", "legs", "back") var slot: String
+@export_enum("chatarra", "reparada", "legendaria") var rarity := 0
+@export_multiline var description: String
 @export var texture: Texture2D
 @export var stats: Dictionary
 @export var scene: PackedScene

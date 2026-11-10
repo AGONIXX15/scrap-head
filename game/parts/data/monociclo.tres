@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Part" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/parts/part.gd" id="1"]
+[ext_resource type="Texture2D" path="res://game/parts/sprites/part_wheel.png" id="2"]
+
+
+[resource]
+script = ExtResource("1")
+name = "Monociclo"
+slot = "legs"
+texture = ExtResource("2")
+stats = {"speed": 70.0, "max_hp": -2}
+rarity = 0
+description = "Rapidísimo, pero un bache y te vas al suelo. Equilibrio no incluido."

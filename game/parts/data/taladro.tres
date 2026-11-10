@@ -10,4 +10,5 @@ name = "Taladro"
 slot = "arm"
 texture = ExtResource("2")
 stats = {"pierce": 2}
-
+rarity = 0
+description = "Las balas atraviesan enemigos. Con perdón de sus tuercas."
