@@ -23,12 +23,18 @@ En un planeta abandonado, un pequeño robot hecho de piezas recicladas sobrevive
 ## Estructura
 
 ```
-assets/sprites/   sprites PNG generados
-parts/            piezas equipables (.tres)
-scenes/           escenas (.tscn)
-scripts/          scripts GDScript
-tools/            scripts para generar arte y audio
-docs/             GDD y backlog
+game/
+  player/        robot del jugador (escena, script y sprites por capas)
+  weapons/       proyectiles del jugador
+  enemies/       un módulo por enemigo (oxidado, chispa, remachadora, prensa) y su base común
+  parts/         sistema de piezas: recurso Part, datos (.tres), sprites y dron escolta
+  level/         arena, oleadas y aviso de aparición
+  intro/         cinemática inicial con su arte y audio
+  fx/            explosiones, impactos y polvo
+  autoload/      Juice (sacudida, hitstop, números de daño)
+  shared/        sprites compartidos
+tools/           scripts que generan arte y audio
+docs/            GDD, backlog y guía de piezas
 ```
 
 Regenerar sprites: `python3 tools/gen_sprites.py` (requiere Pillow).

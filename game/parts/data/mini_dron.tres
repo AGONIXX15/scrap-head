@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Part" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/parts/part.gd" id="1"]
+[ext_resource type="Texture2D" path="res://game/parts/sprites/part_dock.png" id="2"]
+[ext_resource type="PackedScene" path="res://game/parts/drone/drone.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+name = "Mini dron escolta"
+slot = "back"
+texture = ExtResource("2")
+stats = {}
+scene = ExtResource("3")
