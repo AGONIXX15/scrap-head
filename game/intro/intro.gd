@@ -27,6 +27,11 @@ const ROLL_TIME := FALL_TIME - FALL_BASE # segundos que la intro crece desde AT_
 const T_S4 := 27.6 + ROLL_TIME
 const T_TITLE := 29.5 + ROLL_TIME
 const T_FADE_OUT := 31.5 + ROLL_TIME
+const SAY_DELAY_S1 := 0.6
+const SAY_DELAY_S3 := 0.3
+const EYE_GLOW_COLOR := Color(1, 0.15, 0.1, 0.8)
+const VISOR_GLOW_COLOR := Color(1, 0.6, 0.15, 0.9)
+const DRAG_PUFF_OFF := Vector2(-30, 40)
 const S1_PAN := Vector3(60, 130, 230)
 const S2_PAN := Vector3(70, 150, 300)
 const S2_EYES_PAN := 110.0
@@ -259,8 +264,8 @@ func _eyes(parent: Node, pos: Vector2, sc: float) -> Node2D:
 	var g := Sprite2D.new()
 	g.texture = _tex(DIR + "glow.png")
 	g.material = _glow_mat
-	g.modulate = Color(1, 0.15, 0.1, 0.8)
-	g.scale = Vector2(1, 1)
+	g.modulate = EYE_GLOW_COLOR
+	g.scale = Vector2.ONE
 	n.add_child(g)
 	var e := Sprite2D.new()
 	e.texture = _tex(DIR + "eyes.png")
@@ -383,13 +388,13 @@ func _cut_in(idx: int) -> void:
 
 func _run_s1() -> void:
 	_pan(_s1_layers, S1_PAN, T_S2)
-	get_tree().create_timer(0.6).timeout.connect(_say.bind(0))
+	get_tree().create_timer(SAY_DELAY_S1).timeout.connect(_say.bind(0))
 
 func _run_s2() -> void:
 	_cut_in(1)
 	_pan(_s2_layers, S2_PAN, T_S3 - T_S2)
 	create_tween().tween_property(_s2_eyes, "position:x", -S2_EYES_PAN, T_S3 - T_S2)
-	get_tree().create_timer(0.6).timeout.connect(_say.bind(1))
+	get_tree().create_timer(SAY_DELAY_S1).timeout.connect(_say.bind(1))
 	for i in _s2_eyes.get_child_count():
 		get_tree().create_timer(EYE_START + i * EYE_STEP).timeout.connect(_eye_on.bind(_s2_eyes.get_child(i)))
 
@@ -403,7 +408,7 @@ func _run_s3() -> void:
 	_cut_in(2)
 	_cam.position.y = HEAD_START.y + CAM_LEAD
 	_following = true
-	get_tree().create_timer(0.3).timeout.connect(_say.bind(2))
+	get_tree().create_timer(SAY_DELAY_S3).timeout.connect(_say.bind(2))
 
 func _lp(v: Vector2) -> Vector2:
 	return v / ROBOT_SCALE
@@ -596,7 +601,7 @@ func _drag() -> void:
 		tw.tween_property(arm, "rotation", -ARM_REACH, ARM_REACH_TIME)
 		tw.tween_callback(func():
 			# SFX: arrastre
-			_puff(_robot.position + Vector2(-30, 40)))
+			_puff(_robot.position + DRAG_PUFF_OFF))
 		tw.tween_property(_robot, "position:x", HEAD_X + step * (i + 1), JERK_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.parallel().tween_property(_robot, "position:y", GROUND_Y + DRAG_DROP * (i + 1) / JERKS, JERK_TIME)
 		tw.parallel().tween_property(arm, "rotation", 0.0, JERK_TIME)
@@ -638,7 +643,7 @@ func _visor_on() -> void:
 	var g := Sprite2D.new()
 	g.texture = _tex(DIR + "glow.png")
 	g.material = _glow_mat
-	g.modulate = Color(1, 0.6, 0.15, 0.9)
+	g.modulate = VISOR_GLOW_COLOR
 	g.position = VISOR_GLOW_POS
 	g.scale = Vector2(GLOW_SCALE, GLOW_SCALE)
 	_robot.add_child(g)

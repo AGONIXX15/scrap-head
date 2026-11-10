@@ -42,6 +42,8 @@ func _physics_process(delta: float) -> void:
 		velocity = _knock
 		_telegraph(EXPLODE_RADIUS, 1.0 - _fuse / FUSE_TIME)
 		if _fuse <= 0.0:
+			if dist <= EXPLODE_RADIUS:
+				_player.take_damage(damage)
 			hp = 0
 			_die()
 			return
@@ -52,7 +54,3 @@ func _physics_process(delta: float) -> void:
 			_fuse = FUSE_TIME
 			# SFX: charge
 	move_and_slide()
-
-func _on_death() -> void:
-	if is_instance_valid(_player) and global_position.distance_to(_player.global_position) <= EXPLODE_RADIUS:
-		_player.take_damage(damage)
