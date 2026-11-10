@@ -3,11 +3,11 @@ config_version=5
 [application]
 
 config/name="Scrap Head"
-run/main_scene="res://scenes/intro.tscn"
+run/main_scene="res://game/intro/intro.tscn"
 
 [autoload]
 
-Juice="*res://scripts/juice.gd"
+Juice="*res://game/autoload/juice.gd"
 
 [display]
 
