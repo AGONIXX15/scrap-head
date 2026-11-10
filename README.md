@@ -33,11 +33,8 @@ game/
   fx/            explosiones, impactos y polvo
   autoload/      Juice (sacudida, hitstop, números de daño)
   shared/        sprites compartidos
-tools/           scripts que generan arte y audio
 docs/            GDD, backlog y guía de piezas
 ```
-
-Regenerar sprites: `python3 tools/gen_sprites.py` (requiere Pillow).
 
 ## Documentación
 
@@ -47,4 +44,4 @@ Regenerar sprites: `python3 tools/gen_sprites.py` (requiere Pillow).
 
 ## Créditos
 
-Arte y audio propios, generados con scripts en `tools/`.
+Arte y audio propios.

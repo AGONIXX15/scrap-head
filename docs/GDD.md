@@ -74,7 +74,7 @@ Todos heredan de `EnemyBase` (vida, flash, empuje, barra de vida tras recibir da
 Pixel art 32x32, paleta óxido / metal / acento naranja, contorno oscuro y 2-3 tonos por material.
 
 ## Audio
-Chiptune generado por script: música de fondo y efectos (disparo, golpe, explosión).
+Música ambiental industrial en la cinemática. Música de partida y efectos (disparo, golpe, explosión) en HU-06.
 
 ## Controles
 WASD o flechas para moverse. Mouse para apuntar y clic izquierdo para disparar.
