@@ -63,18 +63,18 @@ Como jugador quiero personajes y efectos animados para que el juego se vea vivo.
 - [x] Squash al empezar a moverse y polvo al caminar.
 - [x] Al morir, el robot se desarma antes de reiniciar.
 
+### HU-08 Cinco oleadas
+Como jugador quiero oleadas con temporizador y dificultad creciente para sentir progresión.
+- [x] Hay 5 oleadas con temporizador visible.
+- [x] Cada oleada genera más enemigos o más fuertes.
+- [x] Al acabar el tiempo se limpian los enemigos y se pasa a una pausa entre oleadas (el taller llega con HU-11).
+
 ## Épica 2: Estructura de partida (Entrega 2)
 
 ### HU-07 Pantalla de título
 Como jugador quiero una pantalla de título para empezar la partida de forma clara.
 - [ ] Muestra el nombre del juego y botones Jugar y Salir.
 - [ ] Jugar carga la arena.
-
-### HU-08 Cinco oleadas
-Como jugador quiero oleadas con temporizador y dificultad creciente para sentir progresión.
-- [ ] Hay 5 oleadas con temporizador visible.
-- [ ] Cada oleada genera más enemigos o más fuertes.
-- [ ] Al acabar el tiempo se limpian los enemigos y se pasa al taller.
 
 ### HU-09 Variedad de enemigos
 Como jugador quiero distintos tipos de enemigos para variar mi estrategia.
