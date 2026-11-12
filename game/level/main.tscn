@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Texture2D" path="res://game/level/sprites/floor_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/level/sprites/decor.png" id="5"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://game/hud/hud.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://game/hud/pause_menu.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://game/hud/defeat_screen.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://game/objects/barrel/barrel.tscn" id="11"]
 
 [ext_resource type="Script" path="res://game/level/waves.gd" id="4"]
 
@@ -81,6 +82,32 @@ shape = SubResource("side")
 
 [node name="Player" parent="." instance=ExtResource("3")]
 position = Vector2(640, 360)
+
+[node name="Barrels" type="Node2D" parent="."]
+
+[node name="Barrel1" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(360, 200)
+
+[node name="Barrel2" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(392, 212)
+
+[node name="Barrel3" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(920, 190)
+
+[node name="Barrel4" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(952, 202)
+
+[node name="Barrel5" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(340, 520)
+
+[node name="Barrel6" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(372, 510)
+
+[node name="Barrel7" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(910, 530)
+
+[node name="Barrel8" parent="Barrels" instance=ExtResource("11")]
+position = Vector2(942, 542)
 
 [node name="Enemies" type="Node" parent="."]
 

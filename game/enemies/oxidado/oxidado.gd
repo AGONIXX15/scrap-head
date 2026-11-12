@@ -32,7 +32,7 @@ func _ready() -> void:
 	_light_energy = light.energy
 
 func _physics_process(delta: float) -> void:
-	if not is_instance_valid(_player):
+	if _dead or not is_instance_valid(_player):
 		return
 	var dir := global_position.direction_to(_player.global_position)
 	_knock = _knock.move_toward(Vector2.ZERO, KNOCK_DECAY * delta)

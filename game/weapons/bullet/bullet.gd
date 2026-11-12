@@ -28,17 +28,25 @@ func _physics_process(delta: float) -> void:
 	if _dist >= max_range:
 		queue_free()
 
-func _on_body_entered(_body: Node) -> void:
+func _on_body_entered(body: Node) -> void:
+	if is_queued_for_deletion():
+		return
+	if body.has_method("hit") and body not in _hit:
+		_hit.append(body)
+		body.hit(damage, direction)
+		_impact(true)
+		return
 	_impact(false)
 
 func _on_area_entered(area: Area2D) -> void:
 	if is_queued_for_deletion():
 		return
-	var enemy := area.get_parent()
-	if enemy in _hit:
+	var target := area.get_parent()
+	if target in _hit:
 		return
-	_hit.append(enemy)
-	enemy.hit(damage, direction)
+	_hit.append(target)
+	if target.has_method("hit"):
+		target.hit(damage, direction)
 	_impact(true)
 
 func _impact(hurt: bool) -> void:
