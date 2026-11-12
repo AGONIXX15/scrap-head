@@ -32,7 +32,7 @@ func _ready() -> void:
 	_light_energy = light.energy
 
 func _physics_process(delta: float) -> void:
-	if not is_instance_valid(_player):
+	if _dead or not is_instance_valid(_player):
 		return
 	var dir := global_position.direction_to(_player.global_position)
 	_knock = _knock.move_toward(Vector2.ZERO, KNOCK_DECAY * delta)
@@ -41,8 +41,8 @@ func _physics_process(delta: float) -> void:
 	velocity = _knock
 	match _state:
 		State.CHASE:
-			velocity += dir * speed
-			_t += delta * WALK_FPS
+			velocity += dir * (speed * speed_mult)
+			_t += delta * (WALK_FPS * speed_mult)
 			sprite.frame = int(_t) % sprite.hframes
 			if global_position.distance_to(_player.global_position) < LUNGE_RANGE:
 				_state = State.WINDUP
@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 				sprite.position = Vector2.ZERO
 				_set_eye(true)
 		State.LUNGE:
-			velocity = _lunge_dir * LUNGE_SPEED
+			velocity = _lunge_dir * (LUNGE_SPEED * speed_mult)
 			if _timer <= 0.0:
 				_state = State.RECOVER
 				_timer = RECOVER_TIME

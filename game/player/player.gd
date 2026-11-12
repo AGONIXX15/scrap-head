@@ -59,6 +59,7 @@ const RELOAD_DELAY := 1.0
 @export var base_damage := 1
 @export var base_range := 450.0
 @export var base_pierce := 0
+@export var base_bounces := 0
 @export var base_auto_aim := false
 
 @onready var rig: Node2D = $Rig
@@ -81,10 +82,13 @@ var fire_rate: float
 var damage: int
 var shoot_range: float
 var pierce: int
+var bounces: int
 var auto_aim: bool
 var hp: int
 var parts := {}
 var scrap := 0
+var speed_mult := 1.0
+var _oil_count := 0
 
 var _extras := {}
 var _clock := 0.0
@@ -99,10 +103,12 @@ func _ready() -> void:
 	_recalc()
 	hp = max_hp
 	hp_changed.emit(hp, max_hp)
+	parts_changed.emit(parts)
+	scrap_changed.emit(scrap)
 
 func _physics_process(delta: float) -> void:
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = dir * speed
+	velocity = dir * (speed * speed_mult)
 	move_and_slide()
 
 	var aim := nearest_enemy(global_position, shoot_range) if auto_aim else get_global_mouse_position()
@@ -121,7 +127,7 @@ func _physics_process(delta: float) -> void:
 	_moving = moving
 	dust.emitting = moving
 	_clock += delta
-	_anim += delta * (WALK_FPS if moving else IDLE_FPS)
+	_anim += delta * ((WALK_FPS * speed_mult) if moving else IDLE_FPS)
 	legs.frame = WALK_FIRST + int(_anim) % WALK_FRAMES if moving else int(_anim) % IDLE_FRAMES
 	var bob: int = BOB_WALK[int(_anim) % WALK_FRAMES] if moving else BOB_IDLE[int(_anim) % IDLE_FRAMES]
 	for n in [torso, back, head]:
@@ -178,6 +184,17 @@ func add_scrap(n: int) -> void:
 	scrap += n
 	scrap_changed.emit(scrap)
 
+func set_oil_slow(factor: float) -> void:
+	_oil_count += 1
+	if _stat("ignore_oil") > 0.0:
+		return
+	speed_mult = factor
+
+func remove_oil_slow() -> void:
+	_oil_count = maxi(_oil_count - 1, 0)
+	if _oil_count == 0 or _stat("ignore_oil") > 0.0:
+		speed_mult = 1.0
+
 func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
 	var best := max_dist
 	var target := Vector2.INF
@@ -193,6 +210,8 @@ func spawn_bullet(pos: Vector2, direction: Vector2) -> void:
 	b.direction = direction
 	b.damage = damage
 	b.pierce = pierce
+	b.bounces = bounces
+	b.is_disc = bounces > 0
 	b.max_range = shoot_range
 	b.global_position = pos
 	get_tree().current_scene.add_child(b)
@@ -210,7 +229,12 @@ func _recalc() -> void:
 	damage = base_damage + int(_stat("damage"))
 	shoot_range = base_range + _stat("range")
 	pierce = base_pierce + int(_stat("pierce"))
+	bounces = base_bounces + int(_stat("bounces"))
 	auto_aim = base_auto_aim or _stat("auto_aim") > 0.0
+	if _stat("ignore_oil") > 0.0:
+		speed_mult = 1.0
+	elif _oil_count > 0:
+		speed_mult = 0.45
 
 func _shoot(direction: Vector2) -> void:
 	# SFX: shoot
@@ -249,7 +273,8 @@ func _float_text(text: String) -> void:
 	l.add_theme_constant_override("outline_size", TEXT_OUTLINE)
 	l.global_position = global_position + TEXT_OFFSET
 	l.z_index = TEXT_Z
-	get_tree().current_scene.add_child(l)
+	var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
+	scene.add_child(l)
 	var t := l.create_tween().set_parallel()
 	t.tween_property(l, "position:y", l.position.y - TEXT_RISE, TEXT_TIME)
 	t.tween_property(l, "modulate:a", 0.0, TEXT_FADE_TIME).set_delay(TEXT_FADE_DELAY)
@@ -271,5 +296,3 @@ func _disassemble() -> void:
 		t.tween_property(n, "position", n.position + fly + DEBRIS_LIFT, DEBRIS_TIME)
 		t.tween_property(n, "rotation", randf_range(-DEBRIS_SPIN, DEBRIS_SPIN), DEBRIS_TIME)
 		t.tween_property(n, "modulate:a", 0.0, DEBRIS_FADE_TIME).set_delay(DEBRIS_FADE_DELAY)
-	await get_tree().create_timer(RELOAD_DELAY).timeout
-	get_tree().reload_current_scene()

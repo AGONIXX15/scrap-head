@@ -1,0 +1,198 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/hud/hud.gd" id="1"]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 6
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+mouse_filter = 2
+
+[node name="TopRow" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="StatsDock" type="PanelContainer" parent="Margin/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatsBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock"]
+layout_mode = 2
+theme_override_constants/separation = 10
+mouse_filter = 2
+
+[node name="HpBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock/StatsBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+mouse_filter = 2
+
+[node name="HpTag" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/HpBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HP"
+mouse_filter = 2
+
+[node name="HpBar" type="ProgressBar" parent="Margin/TopRow/StatsDock/StatsBox/HpBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(85, 12)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+mouse_filter = 2
+
+[node name="HpLabel" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/HpBox/HpBar"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "5/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
+
+[node name="ScrapBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock/StatsBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+mouse_filter = 2
+
+[node name="ScrapIcon" type="TextureRect" parent="Margin/TopRow/StatsDock/StatsBox/ScrapBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="ScrapLabel" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/ScrapBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "0"
+mouse_filter = 2
+
+[node name="BottomRow" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_vertical = 8
+mouse_filter = 2
+
+[node name="PartsDock" type="PanelContainer" parent="Margin/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SlotsContainer" type="HBoxContainer" parent="Margin/BottomRow/PartsDock"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+mouse_filter = 2
+
+[node name="Slot_head" type="VBoxContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_head"]
+layout_mode = 2
+text = "CABEZA"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_head"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Icon" type="TextureRect" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_head/Frame"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot_arm" type="VBoxContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_arm"]
+layout_mode = 2
+text = "BRAZO"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_arm"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Icon" type="TextureRect" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_arm/Frame"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot_legs" type="VBoxContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_legs"]
+layout_mode = 2
+text = "TRACCIÓN"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_legs"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Icon" type="TextureRect" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_legs/Frame"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Slot_back" type="VBoxContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_back"]
+layout_mode = 2
+text = "ESPALDA"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_back"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Icon" type="TextureRect" parent="Margin/BottomRow/PartsDock/SlotsContainer/Slot_back/Frame"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
