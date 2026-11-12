@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Texture2D" path="res://game/level/sprites/floor_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/level/sprites/decor.png" id="5"]
@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://game/level/arena.gd" id="7"]
 [ext_resource type="PackedScene" path="res://game/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://game/hud/hud.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://game/hud/pause_menu.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://game/hud/defeat_screen.tscn" id="10"]
 
 [ext_resource type="Script" path="res://game/level/waves.gd" id="4"]
 
@@ -117,3 +119,7 @@ anchor_bottom = 1.0
 mouse_filter = 2
 
 [node name="HUD" parent="." instance=ExtResource("8")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("9")]
+
+[node name="DefeatScreen" parent="." instance=ExtResource("10")]

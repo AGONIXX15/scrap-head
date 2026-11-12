@@ -272,5 +272,3 @@ func _disassemble() -> void:
 		t.tween_property(n, "position", n.position + fly + DEBRIS_LIFT, DEBRIS_TIME)
 		t.tween_property(n, "rotation", randf_range(-DEBRIS_SPIN, DEBRIS_SPIN), DEBRIS_TIME)
 		t.tween_property(n, "modulate:a", 0.0, DEBRIS_FADE_TIME).set_delay(DEBRIS_FADE_DELAY)
-	await get_tree().create_timer(RELOAD_DELAY).timeout
-	get_tree().reload_current_scene()
