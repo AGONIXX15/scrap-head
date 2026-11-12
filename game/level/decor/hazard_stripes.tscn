@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://game/level/decor/sprites/hazard_stripes.png" id="1"]
+
+[node name="HazardStripes" type="Node2D" groups=["decor_flat"]]
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("1")

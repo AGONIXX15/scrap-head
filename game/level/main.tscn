@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Texture2D" path="res://game/level/sprites/floor_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/level/sprites/decor.png" id="5"]
@@ -10,6 +10,12 @@
 [ext_resource type="PackedScene" path="res://game/hud/defeat_screen.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://game/objects/barrel/barrel.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://game/objects/oil_puddle/oil_puddle.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://game/level/decor/scrap_pile_large.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://game/level/decor/scrap_pile_small.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://game/level/decor/pipe_h.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://game/level/decor/pipe_v.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://game/level/decor/hazard_barrier.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://game/level/decor/hazard_stripes.tscn" id="18"]
 
 [ext_resource type="Script" path="res://game/level/waves.gd" id="4"]
 
@@ -81,6 +87,20 @@ shape = SubResource("side")
 position = Vector2(1314, 360)
 shape = SubResource("side")
 
+[node name="FloorDecor" type="Node2D" parent="."]
+
+[node name="HazardStripes1" parent="FloorDecor" instance=ExtResource("18")]
+position = Vector2(376, 235)
+
+[node name="HazardStripes2" parent="FloorDecor" instance=ExtResource("18")]
+position = Vector2(936, 225)
+
+[node name="HazardStripes3" parent="FloorDecor" instance=ExtResource("18")]
+position = Vector2(356, 545)
+
+[node name="HazardStripes4" parent="FloorDecor" instance=ExtResource("18")]
+position = Vector2(926, 565)
+
 [node name="OilPuddles" type="Node2D" parent="."]
 
 [node name="Puddle1" parent="OilPuddles" instance=ExtResource("12")]
@@ -97,6 +117,56 @@ position = Vector2(780, 470)
 
 [node name="Puddle5" parent="OilPuddles" instance=ExtResource("12")]
 position = Vector2(640, 560)
+
+[node name="DecorObstacles" type="Node2D" parent="."]
+
+[node name="PipeTop1" parent="DecorObstacles" instance=ExtResource("15")]
+position = Vector2(250, 42)
+
+[node name="PipeTop2" parent="DecorObstacles" instance=ExtResource("15")]
+position = Vector2(1030, 42)
+
+[node name="PipeLeft1" parent="DecorObstacles" instance=ExtResource("16")]
+position = Vector2(36, 240)
+
+[node name="PipeLeft2" parent="DecorObstacles" instance=ExtResource("16")]
+position = Vector2(36, 480)
+
+[node name="PipeRight1" parent="DecorObstacles" instance=ExtResource("16")]
+position = Vector2(1244, 240)
+
+[node name="PipeRight2" parent="DecorObstacles" instance=ExtResource("16")]
+position = Vector2(1244, 480)
+
+[node name="ScrapLarge1" parent="DecorObstacles" instance=ExtResource("13")]
+position = Vector2(150, 120)
+
+[node name="ScrapSmall1" parent="DecorObstacles" instance=ExtResource("14")]
+position = Vector2(190, 135)
+
+[node name="ScrapLarge2" parent="DecorObstacles" instance=ExtResource("13")]
+position = Vector2(1130, 120)
+
+[node name="ScrapSmall2" parent="DecorObstacles" instance=ExtResource("14")]
+position = Vector2(1090, 135)
+
+[node name="ScrapLarge3" parent="DecorObstacles" instance=ExtResource("13")]
+position = Vector2(160, 600)
+
+[node name="ScrapLarge4" parent="DecorObstacles" instance=ExtResource("13")]
+position = Vector2(1120, 600)
+
+[node name="ScrapSmall3" parent="DecorObstacles" instance=ExtResource("14")]
+position = Vector2(450, 620)
+
+[node name="ScrapSmall4" parent="DecorObstacles" instance=ExtResource("14")]
+position = Vector2(830, 95)
+
+[node name="BarrierLeft" parent="DecorObstacles" instance=ExtResource("17")]
+position = Vector2(230, 360)
+
+[node name="BarrierRight" parent="DecorObstacles" instance=ExtResource("17")]
+position = Vector2(1050, 360)
 
 [node name="Player" parent="." instance=ExtResource("3")]
 position = Vector2(640, 360)
