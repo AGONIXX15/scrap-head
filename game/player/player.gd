@@ -85,6 +85,8 @@ var auto_aim: bool
 var hp: int
 var parts := {}
 var scrap := 0
+var speed_mult := 1.0
+var _oil_count := 0
 
 var _extras := {}
 var _clock := 0.0
@@ -104,7 +106,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = dir * speed
+	velocity = dir * (speed * speed_mult)
 	move_and_slide()
 
 	var aim := nearest_enemy(global_position, shoot_range) if auto_aim else get_global_mouse_position()
@@ -123,7 +125,7 @@ func _physics_process(delta: float) -> void:
 	_moving = moving
 	dust.emitting = moving
 	_clock += delta
-	_anim += delta * (WALK_FPS if moving else IDLE_FPS)
+	_anim += delta * ((WALK_FPS * speed_mult) if moving else IDLE_FPS)
 	legs.frame = WALK_FIRST + int(_anim) % WALK_FRAMES if moving else int(_anim) % IDLE_FRAMES
 	var bob: int = BOB_WALK[int(_anim) % WALK_FRAMES] if moving else BOB_IDLE[int(_anim) % IDLE_FRAMES]
 	for n in [torso, back, head]:
@@ -180,6 +182,17 @@ func add_scrap(n: int) -> void:
 	scrap += n
 	scrap_changed.emit(scrap)
 
+func set_oil_slow(factor: float) -> void:
+	if _stat("ignore_oil") > 0.0:
+		return
+	_oil_count += 1
+	speed_mult = factor
+
+func remove_oil_slow() -> void:
+	_oil_count = maxi(_oil_count - 1, 0)
+	if _oil_count == 0:
+		speed_mult = 1.0
+
 func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
 	var best := max_dist
 	var target := Vector2.INF
@@ -213,6 +226,8 @@ func _recalc() -> void:
 	shoot_range = base_range + _stat("range")
 	pierce = base_pierce + int(_stat("pierce"))
 	auto_aim = base_auto_aim or _stat("auto_aim") > 0.0
+	if _stat("ignore_oil") > 0.0:
+		speed_mult = 1.0
 
 func _shoot(direction: Vector2) -> void:
 	# SFX: shoot

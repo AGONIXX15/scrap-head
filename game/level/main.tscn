@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Texture2D" path="res://game/level/sprites/floor_atlas.png" id="2"]
 [ext_resource type="Texture2D" path="res://game/level/sprites/decor.png" id="5"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://game/hud/pause_menu.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://game/hud/defeat_screen.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://game/objects/barrel/barrel.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://game/objects/oil_puddle/oil_puddle.tscn" id="12"]
 
 [ext_resource type="Script" path="res://game/level/waves.gd" id="4"]
 
@@ -79,6 +80,23 @@ shape = SubResource("side")
 [node name="Right" type="CollisionShape2D" parent="Walls"]
 position = Vector2(1314, 360)
 shape = SubResource("side")
+
+[node name="OilPuddles" type="Node2D" parent="."]
+
+[node name="Puddle1" parent="OilPuddles" instance=ExtResource("12")]
+position = Vector2(480, 270)
+
+[node name="Puddle2" parent="OilPuddles" instance=ExtResource("12")]
+position = Vector2(800, 260)
+
+[node name="Puddle3" parent="OilPuddles" instance=ExtResource("12")]
+position = Vector2(510, 460)
+
+[node name="Puddle4" parent="OilPuddles" instance=ExtResource("12")]
+position = Vector2(780, 470)
+
+[node name="Puddle5" parent="OilPuddles" instance=ExtResource("12")]
+position = Vector2(640, 560)
 
 [node name="Player" parent="." instance=ExtResource("3")]
 position = Vector2(640, 360)

@@ -49,7 +49,7 @@ func _physics_process(delta: float) -> void:
 			return
 	else:
 		var dir := global_position.direction_to(_player.global_position)
-		velocity = dir.rotated(sin(_t * ZIG_FREQ + _phase) * ZIG_ANGLE) * speed + _knock
+		velocity = dir.rotated(sin(_t * ZIG_FREQ + _phase) * ZIG_ANGLE) * (speed * speed_mult) + _knock
 		if dist < TRIGGER_DIST:
 			_fuse = FUSE_TIME
 			# SFX: charge

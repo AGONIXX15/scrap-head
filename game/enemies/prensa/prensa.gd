@@ -37,8 +37,8 @@ func _physics_process(delta: float) -> void:
 	velocity = _knock
 	match _state:
 		State.WALK:
-			velocity += global_position.direction_to(_player.global_position) * speed
-			_t += delta * WALK_FPS
+			velocity += global_position.direction_to(_player.global_position) * (speed * speed_mult)
+			_t += delta * (WALK_FPS * speed_mult)
 			sprite.frame = int(_t) % sprite.hframes
 			if _cooldown <= 0.0 and global_position.distance_to(_player.global_position) < SLAM_RANGE:
 				_state = State.WINDUP
