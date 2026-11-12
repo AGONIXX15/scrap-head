@@ -59,6 +59,7 @@ const RELOAD_DELAY := 1.0
 @export var base_damage := 1
 @export var base_range := 450.0
 @export var base_pierce := 0
+@export var base_bounces := 0
 @export var base_auto_aim := false
 
 @onready var rig: Node2D = $Rig
@@ -81,6 +82,7 @@ var fire_rate: float
 var damage: int
 var shoot_range: float
 var pierce: int
+var bounces: int
 var auto_aim: bool
 var hp: int
 var parts := {}
@@ -208,6 +210,8 @@ func spawn_bullet(pos: Vector2, direction: Vector2) -> void:
 	b.direction = direction
 	b.damage = damage
 	b.pierce = pierce
+	b.bounces = bounces
+	b.is_disc = bounces > 0
 	b.max_range = shoot_range
 	b.global_position = pos
 	get_tree().current_scene.add_child(b)
@@ -225,6 +229,7 @@ func _recalc() -> void:
 	damage = base_damage + int(_stat("damage"))
 	shoot_range = base_range + _stat("range")
 	pierce = base_pierce + int(_stat("pierce"))
+	bounces = base_bounces + int(_stat("bounces"))
 	auto_aim = base_auto_aim or _stat("auto_aim") > 0.0
 	if _stat("ignore_oil") > 0.0:
 		speed_mult = 1.0

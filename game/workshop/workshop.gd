@@ -22,7 +22,7 @@ const RARITY_NAMES := ["CHATARRA", "REPARADA", "LEGENDARIA"]
 const RARITY_COLORS := [Color("a0a6b8"), Color("82beff"), Color("ffd64a")]
 const SLOT_NAMES := {Part.HEAD: "Cabeza", Part.ARM: "Brazo", Part.LEGS: "Piernas", Part.BACK: "Espalda"}
 const STAT_NAMES := {"speed": "Velocidad", "max_hp": "Vida", "damage": "Daño", "fire_rate": "Cadencia",
-		"range": "Alcance", "pierce": "Perforación", "auto_aim": "Autoapuntado", "ignore_oil": "Ignora aceite"}
+		"range": "Alcance", "pierce": "Perforación", "auto_aim": "Autoapuntado", "ignore_oil": "Ignora aceite", "bounces": "Rebotes"}
 const LOWER_IS_BETTER := ["fire_rate"]
 
 const TEXT_COLOR := Color("dce0ea")
