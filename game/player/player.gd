@@ -183,14 +183,14 @@ func add_scrap(n: int) -> void:
 	scrap_changed.emit(scrap)
 
 func set_oil_slow(factor: float) -> void:
+	_oil_count += 1
 	if _stat("ignore_oil") > 0.0:
 		return
-	_oil_count += 1
 	speed_mult = factor
 
 func remove_oil_slow() -> void:
 	_oil_count = maxi(_oil_count - 1, 0)
-	if _oil_count == 0:
+	if _oil_count == 0 or _stat("ignore_oil") > 0.0:
 		speed_mult = 1.0
 
 func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
@@ -228,6 +228,8 @@ func _recalc() -> void:
 	auto_aim = base_auto_aim or _stat("auto_aim") > 0.0
 	if _stat("ignore_oil") > 0.0:
 		speed_mult = 1.0
+	elif _oil_count > 0:
+		speed_mult = 0.45
 
 func _shoot(direction: Vector2) -> void:
 	# SFX: shoot
@@ -266,7 +268,8 @@ func _float_text(text: String) -> void:
 	l.add_theme_constant_override("outline_size", TEXT_OUTLINE)
 	l.global_position = global_position + TEXT_OFFSET
 	l.z_index = TEXT_Z
-	get_tree().current_scene.add_child(l)
+	var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
+	scene.add_child(l)
 	var t := l.create_tween().set_parallel()
 	t.tween_property(l, "position:y", l.position.y - TEXT_RISE, TEXT_TIME)
 	t.tween_property(l, "modulate:a", 0.0, TEXT_FADE_TIME).set_delay(TEXT_FADE_DELAY)
