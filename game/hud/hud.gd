@@ -21,9 +21,13 @@ const FRAMES := [
 ]
 const RARITY_NAMES := ["Chatarra", "Reparada", "Legendaria"]
 const RARITY_COLORS := [Color("a0a6b8"), Color("82beff"), Color("ffd64a")]
+const SCRAP_ICON := preload("res://game/parts/scrap/scrap.png")
+const SCRAP_ICON_SIZE := 8
 
 const LABEL_COLOR := Color("a0a6b8")
 const OUTLINE_COLOR := Color("1a1030")
+const GOLD := Color("ffd64a")
+const RED := Color("ff5a4a")
 const LABEL_SIZE := 8
 const LABEL_OUTLINE := 2
 
@@ -34,11 +38,21 @@ const POP_TIME := 0.25
 
 @export var player: CharacterBody2D
 
+@onready var stats_dock: PanelContainer = %StatsDock
+@onready var hp_tag: Label = %HpTag
+@onready var hp_bar: ProgressBar = %HpBar
+@onready var hp_label: Label = %HpLabel
+@onready var scrap_icon: TextureRect = %ScrapIcon
+@onready var scrap_label: Label = %ScrapLabel
+
 @onready var parts_dock: PanelContainer = %PartsDock
 @onready var slots_container: HBoxContainer = %SlotsContainer
 
 var _slot_nodes := {}
 var _last_parts := {}
+var _last_hp := -1
+var _last_max_hp := -1
+var _last_scrap := -1
 var _empty_style: StyleBoxFlat
 var _dock_style: StyleBoxFlat
 
@@ -51,9 +65,17 @@ func _ready() -> void:
 	if player:
 		if not player.parts_changed.is_connected(_on_parts_changed):
 			player.parts_changed.connect(_on_parts_changed)
+		if not player.hp_changed.is_connected(_on_hp_changed):
+			player.hp_changed.connect(_on_hp_changed)
+		if not player.scrap_changed.is_connected(_on_scrap_changed):
+			player.scrap_changed.connect(_on_scrap_changed)
 		update_parts(player.parts)
+		update_hp(player.hp, player.max_hp)
+		update_scrap(player.scrap)
 	else:
 		update_parts({})
+		update_hp(5, 5)
+		update_scrap(0)
 
 func _init_styles() -> void:
 	_empty_style = StyleBoxFlat.new()
@@ -69,6 +91,61 @@ func _init_styles() -> void:
 	_dock_style.set_border_width_all(1)
 	_dock_style.set_corner_radius_all(4)
 	_dock_style.set_content_margin_all(5)
+
+	# Stats dock (top-left)
+	if stats_dock:
+		var stats_sb := StyleBoxFlat.new()
+		stats_sb.bg_color = Color(0.05, 0.04, 0.08, 0.65)
+		stats_sb.border_color = Color(0.18, 0.16, 0.24, 0.65)
+		stats_sb.set_border_width_all(1)
+		stats_sb.set_corner_radius_all(4)
+		stats_sb.content_margin_left = 6
+		stats_sb.content_margin_right = 8
+		stats_sb.content_margin_top = 4
+		stats_sb.content_margin_bottom = 4
+		stats_dock.add_theme_stylebox_override("panel", stats_sb)
+
+	# HP Tag
+	if hp_tag:
+		hp_tag.add_theme_font_size_override("font_size", 8)
+		hp_tag.add_theme_color_override("font_color", RED)
+		hp_tag.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
+		hp_tag.add_theme_constant_override("outline_size", 2)
+
+	# HP Bar
+	if hp_bar:
+		var hp_bg := StyleBoxFlat.new()
+		hp_bg.bg_color = Color(0.14, 0.05, 0.08, 0.9)
+		hp_bg.border_color = Color(0.28, 0.12, 0.18, 0.9)
+		hp_bg.set_border_width_all(1)
+		hp_bg.set_corner_radius_all(2)
+		hp_bar.add_theme_stylebox_override("background", hp_bg)
+
+		var hp_fill := StyleBoxFlat.new()
+		hp_fill.bg_color = Color(0.9, 0.22, 0.25, 1.0)
+		hp_fill.set_corner_radius_all(2)
+		hp_bar.add_theme_stylebox_override("fill", hp_fill)
+
+	# HP Label
+	if hp_label:
+		hp_label.add_theme_font_size_override("font_size", 8)
+		hp_label.add_theme_color_override("font_color", Color.WHITE)
+		hp_label.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
+		hp_label.add_theme_constant_override("outline_size", 2)
+
+	# Scrap Icon
+	if scrap_icon:
+		var icon := AtlasTexture.new()
+		icon.atlas = SCRAP_ICON
+		icon.region = Rect2(0, 0, SCRAP_ICON_SIZE, SCRAP_ICON_SIZE)
+		scrap_icon.texture = icon
+
+	# Scrap Label
+	if scrap_label:
+		scrap_label.add_theme_font_size_override("font_size", 9)
+		scrap_label.add_theme_color_override("font_color", GOLD)
+		scrap_label.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
+		scrap_label.add_theme_constant_override("outline_size", 3)
 
 func _init_dock() -> void:
 	if parts_dock:
@@ -137,6 +214,42 @@ func _style_label(label: Label, text: String) -> void:
 	label.add_theme_constant_override("outline_size", LABEL_OUTLINE)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
+func update_hp(hp: int, max_hp: int) -> void:
+	if not hp_bar or not hp_label:
+		return
+	var prev_hp := _last_hp
+	_last_hp = hp
+	_last_max_hp = max_hp
+
+	hp_bar.max_value = max_hp
+	hp_bar.value = hp
+	hp_label.text = "%d/%d" % [hp, max_hp]
+
+	if prev_hp != -1 and is_inside_tree():
+		if hp < prev_hp:
+			hp_bar.modulate = Color(2.0, 1.8, 1.8)
+			var tw := create_tween()
+			tw.tween_property(hp_bar, "modulate", Color.WHITE, 0.2)
+		elif hp > prev_hp:
+			hp_bar.modulate = Color(1.3, 2.0, 1.3)
+			var tw := create_tween()
+			tw.tween_property(hp_bar, "modulate", Color.WHITE, 0.2)
+
+func update_scrap(scrap: int) -> void:
+	if not scrap_label:
+		return
+	var prev_scrap := _last_scrap
+	_last_scrap = scrap
+
+	scrap_label.text = str(scrap)
+
+	if prev_scrap != -1 and scrap > prev_scrap and is_inside_tree() and scrap_icon:
+		scrap_icon.pivot_offset = scrap_icon.size / 2.0 if scrap_icon.size != Vector2.ZERO else Vector2(8, 8)
+		scrap_icon.scale = Vector2(1.3, 1.3)
+		var tw := create_tween()
+		tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(scrap_icon, "scale", Vector2.ONE, 0.15)
+
 func update_parts(parts: Dictionary) -> void:
 	for slot in SLOTS:
 		if not _slot_nodes.has(slot):
@@ -180,14 +293,31 @@ func _pop(control: Control) -> void:
 	control.scale = POP_SCALE
 	tw.tween_property(control, "scale", Vector2.ONE, POP_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
+func _on_hp_changed(hp: int, max_hp: int) -> void:
+	update_hp(hp, max_hp)
+
+func _on_scrap_changed(n: int) -> void:
+	update_scrap(n)
+
 func _on_parts_changed(parts: Dictionary) -> void:
 	update_parts(parts)
 
 func set_player(p: CharacterBody2D) -> void:
-	if player and is_instance_valid(player) and player.parts_changed.is_connected(_on_parts_changed):
-		player.parts_changed.disconnect(_on_parts_changed)
+	if player and is_instance_valid(player):
+		if player.parts_changed.is_connected(_on_parts_changed):
+			player.parts_changed.disconnect(_on_parts_changed)
+		if player.hp_changed.is_connected(_on_hp_changed):
+			player.hp_changed.disconnect(_on_hp_changed)
+		if player.scrap_changed.is_connected(_on_scrap_changed):
+			player.scrap_changed.disconnect(_on_scrap_changed)
 	player = p
 	if player and is_instance_valid(player):
 		if not player.parts_changed.is_connected(_on_parts_changed):
 			player.parts_changed.connect(_on_parts_changed)
+		if not player.hp_changed.is_connected(_on_hp_changed):
+			player.hp_changed.connect(_on_hp_changed)
+		if not player.scrap_changed.is_connected(_on_scrap_changed):
+			player.scrap_changed.connect(_on_scrap_changed)
 		update_parts(player.parts)
+		update_hp(player.hp, player.max_hp)
+		update_scrap(player.scrap)

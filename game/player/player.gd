@@ -100,6 +100,7 @@ func _ready() -> void:
 	hp = max_hp
 	hp_changed.emit(hp, max_hp)
 	parts_changed.emit(parts)
+	scrap_changed.emit(scrap)
 
 func _physics_process(delta: float) -> void:
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")

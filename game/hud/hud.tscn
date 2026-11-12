@@ -18,6 +18,73 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 mouse_filter = 2
 
+[node name="TopRow" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="StatsDock" type="PanelContainer" parent="Margin/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StatsBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock"]
+layout_mode = 2
+theme_override_constants/separation = 10
+mouse_filter = 2
+
+[node name="HpBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock/StatsBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+mouse_filter = 2
+
+[node name="HpTag" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/HpBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HP"
+mouse_filter = 2
+
+[node name="HpBar" type="ProgressBar" parent="Margin/TopRow/StatsDock/StatsBox/HpBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(85, 12)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+mouse_filter = 2
+
+[node name="HpLabel" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/HpBox/HpBar"]
+unique_name_in_owner = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "5/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
+
+[node name="ScrapBox" type="HBoxContainer" parent="Margin/TopRow/StatsDock/StatsBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+mouse_filter = 2
+
+[node name="ScrapIcon" type="TextureRect" parent="Margin/TopRow/StatsDock/StatsBox/ScrapBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="ScrapLabel" type="Label" parent="Margin/TopRow/StatsDock/StatsBox/ScrapBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "0"
+mouse_filter = 2
+
 [node name="BottomRow" type="HBoxContainer" parent="Margin"]
 layout_mode = 2
 size_flags_vertical = 8
