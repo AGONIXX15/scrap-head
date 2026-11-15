@@ -58,6 +58,7 @@ var _flash_tween: Tween
 var _cold := 0.0
 
 func _ready() -> void:
+	set_process(false)  # solo hace falta con quemadura o frío
 	_player = get_tree().get_first_node_in_group("player")
 	if elite:
 		hp *= ELITE_HP_MULT
@@ -133,12 +134,14 @@ func remove_oil_slow() -> void:
 # Ígneo: 1 de daño cada BURN_TICK durante duration; reaplicar refresca.
 func burn(duration := BURN_TIME) -> void:
 	_burn = duration
+	set_process(true)
 	_burn_tick = 0.0
 	_refresh_status()
 
 # Criogénico: ralentiza a la mitad durante duration; se combina con el aceite.
 func freeze(duration := COLD_TIME) -> void:
 	_cold = duration
+	set_process(true)
 	_refresh_status()
 
 func _process(delta: float) -> void:
@@ -154,6 +157,8 @@ func _process(delta: float) -> void:
 		_cold -= delta
 		if _cold <= 0.0:
 			_refresh_status()
+	if _burn <= 0.0 and _cold <= 0.0:
+		set_process(false)
 
 func _oil_mult() -> float:
 	return _oil_factor if _oil_count > 0 else 1.0

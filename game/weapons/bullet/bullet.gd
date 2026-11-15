@@ -1,4 +1,4 @@
-extends Area2D
+class_name Bullet extends Area2D
 
 const IMPACT := preload("res://game/fx/impact.tscn")
 const DISC_TEXTURE := preload("res://game/weapons/bullet/saw_disc.png")
@@ -13,6 +13,10 @@ const FRAGMENTS := [-30.0, 0.0, 30.0]
 const FRAGMENT_SCALE := 0.6
 const FRAGMENT_RANGE := 120.0
 const KNOCK_PER_HYDRAULIC := 2.0
+const HOMING_SEARCH := 0.1  # s entre búsquedas de objetivo
+const MAX_BULLETS := 300  # balas del jugador vivas; al llegar no hay fragmentos ni perdigones extra
+
+static var live := 0
 
 @export var speed := 400.0
 
@@ -22,16 +26,21 @@ var pierce := 0
 var bounces := 0
 var max_range := 450.0
 var is_disc := false
+var quiet := false  # sin FX de impacto: solo al llegar al tope de balas
 # id de efecto -> cantidad (solo las balas del jugador; las hijas van vacías para no encadenar efectos)
 var effects := {}
 
 var _returning := false
 var _dist := 0.0
 var _hit: Array[Node] = []
+var _target: Node2D
+var _search := 0.0
 
 @onready var sprite: Sprite2D = $Sprite
 
 func _ready() -> void:
+	live += 1
+	tree_exited.connect(func(): live -= 1)
 	if is_disc:
 		sprite.texture = DISC_TEXTURE
 		sprite.hframes = 1
@@ -66,13 +75,19 @@ func _physics_process(delta: float) -> void:
 
 # Gira suavemente hacia el enemigo más cercano dentro del cono frontal.
 func _home(delta: float) -> void:
-	var best := HOMING_RANGE
-	var turn := 0.0
-	for e: Node2D in get_tree().get_nodes_in_group("enemies"):
-		var to := e.global_position - global_position
-		if to.length() <= best and e not in _hit and absf(direction.angle_to(to)) <= HOMING_CONE:
-			best = to.length()
-			turn = direction.angle_to(to)
+	_search -= delta
+	if _search <= 0.0:
+		_search = HOMING_SEARCH
+		_target = null
+		var best := HOMING_RANGE
+		for e: Node2D in Spatial.near(global_position, HOMING_RANGE):
+			var to := e.global_position - global_position
+			if to.length() <= best and e not in _hit and absf(direction.angle_to(to)) <= HOMING_CONE:
+				best = to.length()
+				_target = e
+	if not is_instance_valid(_target) or _target in _hit:
+		return
+	var turn := direction.angle_to(_target.global_position - global_position)
 	if turn != 0.0:
 		direction = direction.rotated(clampf(turn, -HOMING_TURN * delta, HOMING_TURN * delta))
 		if not is_disc:
@@ -118,11 +133,12 @@ func _bounce() -> void:
 	if not is_disc:
 		rotation = direction.angle()
 
-	var fx := IMPACT.instantiate()
-	fx.global_position = global_position
-	fx.rotation = normal.angle()
-	var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
-	scene.add_child.call_deferred(fx)
+	if not quiet:
+		var fx := IMPACT.instantiate()
+		fx.global_position = global_position
+		fx.rotation = normal.angle()
+		var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
+		scene.add_child.call_deferred(fx)
 
 func _on_area_entered(area: Area2D) -> void:
 	if is_queued_for_deletion():
@@ -139,11 +155,12 @@ func _on_area_entered(area: Area2D) -> void:
 func _impact(hurt: bool) -> void:
 	if is_queued_for_deletion():
 		return
-	var fx := IMPACT.instantiate()
-	fx.global_position = global_position
-	fx.rotation = direction.angle() + PI
-	var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
-	scene.add_child.call_deferred(fx)
+	if not quiet:
+		var fx := IMPACT.instantiate()
+		fx.global_position = global_position
+		fx.rotation = direction.angle() + PI
+		var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
+		scene.add_child.call_deferred(fx)
 	if hurt and pierce > 0:
 		pierce -= 1
 	else:
@@ -171,6 +188,8 @@ func _on_hurt(target: Node) -> void:
 		_fragment(target)
 
 func _fragment(target: Node) -> void:
+	if live >= MAX_BULLETS:
+		return
 	for a: float in FRAGMENTS:
 		var b: Node = load(scene_file_path).instantiate()
 		b.direction = direction.rotated(deg_to_rad(a))

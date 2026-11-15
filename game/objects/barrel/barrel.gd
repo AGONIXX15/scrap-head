@@ -82,16 +82,12 @@ func explode() -> void:
 
 func _apply_blast_damage() -> void:
 	# Damage enemies
-	var enemies := get_tree().get_nodes_in_group("enemies")
-	for enemy in enemies:
-		if is_instance_valid(enemy) and not enemy.is_queued_for_deletion():
-			var dist := global_position.distance_to(enemy.global_position)
-			if dist <= blast_radius:
-				var dir := global_position.direction_to(enemy.global_position)
-				if dir == Vector2.ZERO:
-					dir = Vector2.RIGHT
-				if enemy.has_method("hit"):
-					enemy.hit(blast_damage, dir)
+	for enemy in Spatial.near(global_position, blast_radius):
+		var dir := global_position.direction_to(enemy.global_position)
+		if dir == Vector2.ZERO:
+			dir = Vector2.RIGHT
+		if enemy.has_method("hit"):
+			enemy.hit(blast_damage, dir)
 
 	# Chain reaction with other barrels
 	var barrels := get_tree().get_nodes_in_group("barrels")

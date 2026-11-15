@@ -206,20 +206,21 @@ func remove_oil_slow() -> void:
 func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
 	var best := max_dist
 	var target := Vector2.INF
-	for e in get_tree().get_nodes_in_group("enemies"):
+	for e in Spatial.near(from, max_dist):
 		var d := from.distance_to(e.global_position)
 		if d <= best:
 			best = d
 			target = e.global_position
 	return target
 
-func spawn_bullet(pos: Vector2, direction: Vector2, range_mult := 1.0) -> void:
+func spawn_bullet(pos: Vector2, direction: Vector2, range_mult := 1.0, quiet := false) -> void:
 	var b := BULLET.instantiate()
 	b.direction = direction
 	b.damage = damage
 	b.pierce = pierce
 	b.bounces = bounces
 	b.is_disc = bounces > 0
+	b.quiet = quiet
 	b.max_range = shoot_range * range_mult
 	b.scale = Vector2.ONE * (1 + effect_count("colosal"))
 	for p: Part in parts.values():
@@ -261,10 +262,12 @@ func _shoot(direction: Vector2) -> void:
 	# SFX: shoot
 	var shotgun := effect_count("escopeta")
 	var n := mini(1 + effect_count("gemelo") + SHOTGUN_PELLETS * shotgun, MAX_SHOTS)
+	if Bullet.live >= Bullet.MAX_BULLETS:
+		n = 1  # tope de balas: solo la principal
 	var half := SHOTGUN_ARC if shotgun > 0 else TWIN_ARC
 	for i in n:
 		var a := lerpf(-half, half, i / float(n - 1)) if n > 1 else 0.0
-		spawn_bullet(muzzle.global_position, direction.rotated(deg_to_rad(a)), SHOTGUN_RANGE if shotgun > 0 else 1.0)
+		spawn_bullet(muzzle.global_position, direction.rotated(deg_to_rad(a)), SHOTGUN_RANGE if shotgun > 0 else 1.0, Bullet.live >= Bullet.MAX_BULLETS)
 	muzzle.show()
 	muzzle.frame = 0
 	var t := create_tween()

@@ -16,8 +16,7 @@ static var _puddles: Array = []
 
 # Rayo desde el enemigo impactado a los `count` enemigos más cercanos (excepto él); les hace `damage`.
 static func lightning(ctx: Node, source: Node2D, count: int, damage: int) -> void:
-	var near := ctx.get_tree().get_nodes_in_group("enemies").filter(func(e: Node2D):
-		return e != source and not e.is_queued_for_deletion() and e.global_position.distance_to(source.global_position) <= BOLT_RADIUS)
+	var near := Spatial.near(source.global_position, BOLT_RADIUS).filter(func(e: Node2D): return e != source)
 	near.sort_custom(func(a: Node2D, b: Node2D):
 		return a.global_position.distance_to(source.global_position) < b.global_position.distance_to(source.global_position))
 	var from := source.global_position
@@ -41,8 +40,8 @@ static func blast(ctx: Node, pos: Vector2, damage: int, skip: Node = null) -> vo
 	fx.scale = Vector2.ONE * BLAST_SCALE
 	ctx.get_tree().current_scene.add_child.call_deferred(fx)
 	Juice.shake(BLAST_SHAKE)
-	for e: Node2D in ctx.get_tree().get_nodes_in_group("enemies"):
-		if e != skip and not e.is_queued_for_deletion() and e.global_position.distance_to(pos) <= BLAST_RADIUS:
+	for e: Node2D in Spatial.near(pos, BLAST_RADIUS):
+		if e != skip:
 			e.hit(damage, pos.direction_to(e.global_position))
 
 static func acid(ctx: Node, pos: Vector2) -> void:

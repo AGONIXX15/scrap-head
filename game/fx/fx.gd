@@ -4,9 +4,18 @@ extends Node2D
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite")
 
+const MAX_FX := 40  # impactos/explosiones simultáneos
+
+static var _live := 0
+
 var _t := 0.0
 
 func _ready() -> void:
+	if _live >= MAX_FX:
+		queue_free()
+		return
+	_live += 1
+	tree_exited.connect(func(): _live -= 1)
 	get_tree().create_timer(life).timeout.connect(queue_free)
 
 func _process(delta: float) -> void:
