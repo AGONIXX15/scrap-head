@@ -61,19 +61,10 @@ func _bounce() -> void:
 	if not result.is_empty() and result.normal != Vector2.ZERO:
 		normal = result.normal
 	else:
-		if global_position.x <= 48.0 and direction.x < 0.0:
-			normal = Vector2.RIGHT
-		elif global_position.x >= 1232.0 and direction.x > 0.0:
-			normal = Vector2.LEFT
-		elif global_position.y <= 64.0 and direction.y < 0.0:
-			normal = Vector2.DOWN
-		elif global_position.y >= 656.0 and direction.y > 0.0:
-			normal = Vector2.UP
+		if absf(direction.x) > absf(direction.y):
+			normal = Vector2(-signf(direction.x), 0)
 		else:
-			if absf(direction.x) > absf(direction.y):
-				normal = Vector2(-signf(direction.x), 0)
-			else:
-				normal = Vector2(0, -signf(direction.y))
+			normal = Vector2(0, -signf(direction.y))
 
 	direction = direction.bounce(normal).normalized()
 	if direction == Vector2.ZERO:

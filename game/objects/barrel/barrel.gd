@@ -33,9 +33,7 @@ func hit(amount: int, _from_dir := Vector2.ZERO) -> void:
 	if _exploded:
 		return
 	hp -= amount
-	var juice := _get_juice()
-	if juice:
-		juice.damage_number(global_position + Vector2(0, -16), amount)
+	Juice.damage_number(global_position + Vector2(0, -16), amount)
 	
 	if hp <= 0:
 		explode()
@@ -72,16 +70,14 @@ func explode() -> void:
 		particles.restart()
 
 	# 3. Screen shake & hitstop
-	var juice := _get_juice()
-	if juice:
-		juice.shake(shake_amount)
-		juice.hitstop()
+	Juice.shake(shake_amount)
+	Juice.hitstop()
 
 	# 4. Area of effect damage
 	_apply_blast_damage()
 
 	# Clean up after particles finish
-	await get_tree().create_timer(0.65).timeout
+	await get_tree().create_timer(0.65, false).timeout
 	queue_free()
 
 func _apply_blast_damage() -> void:
@@ -104,7 +100,7 @@ func _apply_blast_damage() -> void:
 			var dist := global_position.distance_to(b.global_position)
 			if dist <= blast_radius:
 				var chain_delay := randf_range(0.05, 0.12)
-				get_tree().create_timer(chain_delay).timeout.connect(func():
+				get_tree().create_timer(chain_delay, false).timeout.connect(func():
 					if is_instance_valid(b) and not b._exploded:
 						b.hit(blast_damage)
 				)
@@ -126,7 +122,3 @@ func _squash() -> void:
 	_squash_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_squash_tween.tween_property(sprite, "scale", Vector2.ONE, SQUASH_TIME)
 
-func _get_juice() -> Node:
-	if Engine.has_singleton("Juice"):
-		return Engine.get_singleton("Juice")
-	return get_node_or_null("/root/Juice")

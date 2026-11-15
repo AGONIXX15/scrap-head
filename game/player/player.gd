@@ -89,6 +89,7 @@ var parts := {}
 var scrap := 0
 var speed_mult := 1.0
 var _oil_count := 0
+var _oil_factor := 0.45
 
 var _extras := {}
 var _clock := 0.0
@@ -186,6 +187,7 @@ func add_scrap(n: int) -> void:
 
 func set_oil_slow(factor: float) -> void:
 	_oil_count += 1
+	_oil_factor = factor
 	if _stat("ignore_oil") > 0.0:
 		return
 	speed_mult = factor
@@ -234,7 +236,7 @@ func _recalc() -> void:
 	if _stat("ignore_oil") > 0.0:
 		speed_mult = 1.0
 	elif _oil_count > 0:
-		speed_mult = 0.45
+		speed_mult = _oil_factor
 
 func _shoot(direction: Vector2) -> void:
 	# SFX: shoot
