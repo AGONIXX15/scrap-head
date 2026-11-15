@@ -89,10 +89,10 @@ func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	_bar.visible = true
 	_bar.queue_redraw()
 	if hp <= 0:
-		# SFX: explode
+		Sound.play_explode()
 		_die()
 		return
-	# SFX: hit
+	Sound.play_hit()
 	if from_dir != Vector2.ZERO:  # el daño por estado (quemadura, ácido) no cancela el empuje
 		_knock = from_dir * KNOCKBACK * knock_scale
 	if _flash_tween:

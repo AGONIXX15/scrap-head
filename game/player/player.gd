@@ -188,6 +188,7 @@ func take_damage(n: int) -> void:
 	hp_changed.emit(hp, max_hp)
 	fx.thorns()
 	_flash()
+	Sound.play_hit()
 	if hp == 0:
 		_disassemble()
 		return
@@ -196,7 +197,7 @@ func take_damage(n: int) -> void:
 func equip(part: Part) -> void:
 	if hp == 0:
 		return
-	# SFX: equip
+	Sound.play_equip()
 	parts[part.slot] = part
 	var layer: Sprite2D = layers[part.slot]
 	layer.texture = part.texture
@@ -221,7 +222,7 @@ func equip(part: Part) -> void:
 	parts_changed.emit(parts)
 
 func add_scrap(n: int) -> void:
-	# SFX: pickup
+	Sound.play_pickup()
 	scrap += n
 	scrap_changed.emit(scrap)
 
@@ -312,7 +313,7 @@ func _recalc() -> void:
 		speed_mult = _oil_factor
 
 func _shoot(direction: Vector2) -> void:
-	# SFX: shoot
+	Sound.play_shoot()
 	var shotgun := effect_count("escopeta")
 	var n := mini(1 + effect_count("gemelo") + SHOTGUN_PELLETS * shotgun, MAX_SHOTS)
 	if Bullet.live >= Bullet.MAX_BULLETS:
@@ -363,7 +364,7 @@ func _float_text(text: String) -> void:
 	t.chain().tween_callback(l.queue_free)
 
 func _disassemble() -> void:
-	# SFX: explode
+	Sound.play_explode()
 	died.emit()
 	remove_from_group("player")
 	collision.set_deferred("disabled", true)
