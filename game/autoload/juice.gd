@@ -42,7 +42,8 @@ func damage_number(pos: Vector2, amount: int) -> void:
 	l.add_theme_constant_override("outline_size", NUMBER_OUTLINE)
 	l.z_index = 100
 	l.position = pos + Vector2(randf_range(-NUMBER_SPREAD, NUMBER_SPREAD), 0.0)
-	get_tree().current_scene.add_child(l)
+	var scene := get_tree().current_scene if get_tree().current_scene else get_tree().root
+	scene.add_child(l)
 	var tw := l.create_tween().set_parallel()
 	tw.tween_property(l, "position:y", l.position.y - NUMBER_RISE, NUMBER_TIME)
 	tw.tween_property(l, "modulate:a", 0.0, NUMBER_TIME)

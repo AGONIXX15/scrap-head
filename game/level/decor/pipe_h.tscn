@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://game/level/decor/sprites/pipe_h.png" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pipe_h"]
+size = Vector2(64, 10)
+
+[node name="PipeH" type="StaticBody2D" groups=["decor_solid"]]
+collision_mask = 0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_pipe_h")

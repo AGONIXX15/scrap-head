@@ -42,6 +42,8 @@ var _warn := Node2D.new()
 var _warn_radius := 0.0
 var _warn_fill := 0.0
 var _dead := false
+var speed_mult := 1.0
+var _oil_count := 0
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
@@ -100,6 +102,15 @@ func _die(juice := true) -> void:
 		Juice.hitstop()
 		Juice.shake(death_shake)
 	queue_free()
+
+func set_oil_slow(factor: float) -> void:
+	_oil_count += 1
+	speed_mult = factor
+
+func remove_oil_slow() -> void:
+	_oil_count = maxi(_oil_count - 1, 0)
+	if _oil_count == 0:
+		speed_mult = 1.0
 
 func _on_death() -> void:
 	pass
