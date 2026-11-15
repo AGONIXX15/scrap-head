@@ -57,6 +57,16 @@ const TWIN_ARC := 8.0  # grados a cada lado (gemelo)
 const SHOTGUN_ARC := 20.0  # grados a cada lado (escopeta)
 const SHOTGUN_PELLETS := 4  # balas extra por escopeta
 const SHOTGUN_RANGE := 0.4
+const DASH_TIME := 0.18
+const DASH_SPEED := 420.0
+const DASH_COOLDOWN := 2.0
+const DASH_COOLDOWN_STEP := 0.4  # menos espera por copia extra de propulsor
+const DASH_COOLDOWN_MIN := 0.6
+const BERSERK_RATE := 0.35  # cadencia extra por copia con la mitad de vida o menos
+const TELESCOPE_SPEED := 0.2  # velocidad extra de bala por copia
+const TELESCOPE_MAX := 3
+const MAGNET_PER := 40.0
+const VAMPIRE_KILLS := 12  # muertes por vida con una copia; baja 3 por copia extra (mínimo 3)
 
 @export var base_speed := 150.0
 @export var base_max_hp := 5
@@ -93,6 +103,7 @@ var hp: int
 var parts := {}
 var scrap := 0
 var speed_mult := 1.0
+var magnet := 0.0  # radio extra de atracción de chatarra (Magnético)
 var _oil_count := 0
 var _oil_factor := 0.45
 
@@ -102,10 +113,16 @@ var _anim := 0.0
 var _moving := false
 var _invuln := 0.0
 var _cooldown := 0.0
+var _dash_t := 0.0
+var _dash_cd := 0.0
+var _dash_dir := Vector2.ZERO
+var _kills := 0
+var fx := PartFx.new()
 var _squash_tween: Tween
 var _recoil_tween: Tween
 
 func _ready() -> void:
+	add_child(fx)
 	_recalc()
 	hp = max_hp
 	hp_changed.emit(hp, max_hp)
@@ -114,7 +131,19 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = dir * (speed * speed_mult)
+	_dash_cd -= delta
+	if _dash_t > 0.0:
+		_dash_t -= delta
+		velocity = _dash_dir * DASH_SPEED
+		if _dash_t <= 0.0:
+			rig.modulate.a = 1.0
+	else:
+		velocity = dir * (speed * speed_mult)
+		if _dash_cd <= 0.0 and Input.is_action_just_pressed("dash") and has_effect("propulsor"):
+			_dash_t = DASH_TIME
+			_dash_dir = dir if dir != Vector2.ZERO else Vector2(body.scale.x, 0.0)
+			_dash_cd = maxf(DASH_COOLDOWN - DASH_COOLDOWN_STEP * (effect_count("propulsor") - 1), DASH_COOLDOWN_MIN)
+			rig.modulate.a = BLINK_ALPHA
 	move_and_slide()
 
 	var aim := nearest_enemy(global_position, shoot_range) if auto_aim else get_global_mouse_position()
@@ -125,7 +154,7 @@ func _physics_process(delta: float) -> void:
 	_cooldown -= delta
 	if _cooldown <= 0.0 and aim != Vector2.INF and (auto_aim or Input.is_action_pressed("shoot")):
 		_shoot(arm.global_position.direction_to(aim))
-		_cooldown = fire_rate
+		_cooldown = _rate()
 
 	var moving := dir != Vector2.ZERO
 	if moving and not _moving:
@@ -150,10 +179,14 @@ func _physics_process(delta: float) -> void:
 			rig.modulate.a = 1.0
 
 func take_damage(n: int) -> void:
-	if hp == 0 or _invuln > 0.0:
+	if hp == 0 or _invuln > 0.0 or _dash_t > 0.0:
+		return
+	if fx.absorb():
+		_invuln = INVULN_TIME
 		return
 	hp = maxi(hp - n, 0)
 	hp_changed.emit(hp, max_hp)
+	fx.thorns()
 	_flash()
 	if hp == 0:
 		_disassemble()
@@ -177,6 +210,7 @@ func equip(part: Part) -> void:
 		add_child(_extras[part.slot])
 	var old_max := max_hp
 	_recalc()
+	fx.refresh()
 	hp = clampi(hp + max_hp - old_max, MIN_HP, max_hp)
 	hp_changed.emit(hp, max_hp)
 	torso.texture = BODIES[BODY_BY_PARTS[parts.size()]]
@@ -190,6 +224,20 @@ func add_scrap(n: int) -> void:
 	# SFX: pickup
 	scrap += n
 	scrap_changed.emit(scrap)
+
+func heal(n: int) -> void:
+	if hp > 0:
+		hp = mini(hp + n, max_hp)
+		hp_changed.emit(hp, max_hp)
+
+# Lo llama el enemigo al morir por daño (Vampírico).
+func enemy_killed() -> void:
+	var n := effect_count("vampiro")
+	if n > 0:
+		_kills += 1
+		if _kills >= maxi(VAMPIRE_KILLS - 3 * n, 3):
+			_kills = 0
+			heal(1)
 
 func set_oil_slow(factor: float) -> void:
 	_oil_count += 1
@@ -226,6 +274,7 @@ func spawn_bullet(pos: Vector2, direction: Vector2, range_mult := 1.0, quiet := 
 	for p: Part in parts.values():
 		for id in p.effects:
 			b.effects[id] = b.effects.get(id, 0) + 1
+	b.speed *= 1.0 + TELESCOPE_SPEED * mini(b.effects.get("telescopico", 0), TELESCOPE_MAX)
 	b.global_position = pos
 	get_tree().current_scene.add_child(b)
 
@@ -237,6 +286,9 @@ func effect_count(id: String) -> int:
 
 func has_effect(id: String) -> bool:
 	return effect_count(id) > 0
+
+func _rate() -> float:
+	return fire_rate / (1.0 + BERSERK_RATE * effect_count("berserker")) if hp * 2 <= max_hp else fire_rate
 
 func _stat(key: String) -> float:
 	var s := 0.0
@@ -253,6 +305,7 @@ func _recalc() -> void:
 	pierce = base_pierce + int(_stat("pierce"))
 	bounces = base_bounces + int(_stat("bounces"))
 	auto_aim = base_auto_aim or _stat("auto_aim") > 0.0
+	magnet = MAGNET_PER * effect_count("iman")
 	if _stat("ignore_oil") > 0.0:
 		speed_mult = 1.0
 	elif _oil_count > 0:
@@ -315,6 +368,9 @@ func _disassemble() -> void:
 	remove_from_group("player")
 	collision.set_deferred("disabled", true)
 	set_physics_process(false)
+	fx.set_process(false)
+	for c in fx.get_children():
+		c.queue_free()
 	dust.emitting = false
 	rig.modulate.a = 1.0
 	for e in _extras.values():

@@ -14,6 +14,9 @@ const FRAGMENT_SCALE := 0.6
 const FRAGMENT_RANGE := 120.0
 const KNOCK_PER_HYDRAULIC := 2.0
 const HOMING_SEARCH := 0.1  # s entre búsquedas de objetivo
+const CRIT_PER := 0.15
+const CRIT_MAX := 0.6
+const SNIPER_DIST := 250.0
 const MAX_BULLETS := 300  # balas del jugador vivas; al llegar no hay fragmentos ni perdigones extra
 
 static var live := 0
@@ -98,7 +101,7 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body.has_method("hit") and body not in _hit:
 		_hit.append(body)
-		body.hit(damage, direction * _knock())
+		body.hit(_dmg(body), direction * _knock())
 		_on_hurt(body)
 		_impact(true)
 		return
@@ -148,7 +151,7 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	_hit.append(target)
 	if target.has_method("hit"):
-		target.hit(damage, direction * _knock())
+		target.hit(_dmg(target), direction * _knock())
 		_on_hurt(target)
 	_impact(true)
 
@@ -169,6 +172,20 @@ func _impact(hurt: bool) -> void:
 func _knock() -> float:
 	return 1.0 + KNOCK_PER_HYDRAULIC * effects.get("hidraulico", 0)
 
+# Daño del golpe: crítico (Ciclópeo), distancia (Francotirador) y marca del enemigo (Marcador).
+func _dmg(target: Node) -> int:
+	if effects.is_empty():
+		return damage
+	var d := damage
+	if effects.has("ciclopeo") and randf() < minf(CRIT_PER * effects.ciclopeo, CRIT_MAX):
+		d *= 2
+	if effects.has("francotirador") and _dist > SNIPER_DIST:
+		d += effects.francotirador
+	var marked = target.get("mark_bonus")
+	if marked:
+		d += marked
+	return d
+
 # Efectos al dañar a un objetivo (los de estado solo afectan a enemigos).
 func _on_hurt(target: Node) -> void:
 	if effects.is_empty():
@@ -177,6 +194,8 @@ func _on_hurt(target: Node) -> void:
 		target.burn()
 	if target.has_method("freeze") and effects.has("criogenico"):
 		target.freeze()
+	if target.has_method("mark") and effects.has("marcador"):
+		target.mark(effects.marcador)
 	if target is Node2D:
 		if effects.has("electrico"):
 			ArmFx.lightning(self, target as Node2D, effects.electrico, damage)

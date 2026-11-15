@@ -72,12 +72,33 @@ const EFFECTS := {
 	],
 	Part.HEAD: [
 		{"id": "autoapuntado", "min_rarity": 2, "cost": 3, "adj": "Autoapuntado", "adj_f": "Autoapuntada", "desc": "Apunta y dispara solo.", "stats": {"auto_aim": 1}},
+		{"id": "ciclopeo", "min_rarity": 1, "cost": 3, "adj": "Ciclópeo", "adj_f": "Ciclópea", "desc": "15% de crítico (x2 daño) por copia, hasta 60%."},
+		{"id": "telescopico", "min_rarity": 0, "cost": 2, "adj": "Telescópico", "adj_f": "Telescópica", "desc": "Más alcance y balas más rápidas.", "stats": {"range": 80}},
+		{"id": "marcador", "min_rarity": 1, "cost": 3, "adj": "Marcador", "adj_f": "Marcadora", "desc": "Marca a los enemigos: reciben más daño 3 s."},
+		{"id": "francotirador", "min_rarity": 2, "cost": 4, "adj": "Francotirador", "adj_f": "Francotiradora", "desc": "Más daño si la bala viaja lejos."},
+		{"id": "berserker", "min_rarity": 2, "cost": 3, "adj": "Berserker", "desc": "Dispara más rápido con la mitad de vida o menos."},
+		{"id": "tasador", "min_rarity": 1, "cost": 2, "adj": "Tasador", "adj_f": "Tasadora", "desc": "+1 chatarra por cada recogida."},
+		{"id": "radar", "min_rarity": 1, "cost": 2, "adj": "Rastreador", "adj_f": "Rastreadora", "desc": "Puntos rojos señalan enemigos fuera de pantalla."},
 	],
 	Part.LEGS: [
 		{"id": "antideslizante", "min_rarity": 1, "cost": 2, "adj": "Antideslizante", "desc": "Ignora el aceite.", "stats": {"ignore_oil": 1}},
+		{"id": "propulsor", "min_rarity": 2, "cost": 4, "adj": "Propulsor", "adj_f": "Propulsora", "desc": "Shift: dash invulnerable. Más copias, menos espera."},
+		{"id": "rastro_fuego", "min_rarity": 1, "cost": 3, "adj": "Incendiario", "adj_f": "Incendiaria", "desc": "Deja fuego a tu paso."},
+		{"id": "rastro_aceite", "min_rarity": 1, "cost": 2, "adj": "Aceitoso", "adj_f": "Aceitosa", "desc": "Deja aceite que ralentiza a los enemigos."},
+		{"id": "minas", "min_rarity": 2, "cost": 4, "adj": "Minero", "adj_f": "Minera", "desc": "Suelta minas que explotan al acercarse un enemigo."},
+		{"id": "pisoton", "min_rarity": 2, "cost": 4, "adj": "Pisoteador", "adj_f": "Pisoteadora", "desc": "Cada 4 s una onda daña y empuja."},
+		{"id": "patinador", "min_rarity": 0, "cost": 2, "adj": "Patinador", "adj_f": "Patinadora", "desc": "Más velocidad.", "stats": {"speed": 20}},
 	],
 	Part.BACK: [
 		{"id": "orbital", "min_rarity": 2, "cost": 4, "adj": "Orbital", "desc": "Un mini dron te escolta.", "scene": preload("res://game/parts/drone/drone.tscn")},
+		{"id": "sierra_orbital", "min_rarity": 2, "cost": 4, "adj": "Aserrador", "adj_f": "Aserradora", "desc": "Una sierra gira a tu alrededor."},
+		{"id": "escudo", "min_rarity": 2, "cost": 4, "adj": "Blindado", "adj_f": "Blindada", "desc": "Bloquea un golpe; se recarga en 8 s."},
+		{"id": "espinas", "min_rarity": 1, "cost": 3, "adj": "Espinoso", "adj_f": "Espinosa", "desc": "Al recibir daño, hiere a los enemigos cercanos."},
+		{"id": "reactor", "min_rarity": 0, "cost": 2, "adj": "Reactivo", "adj_f": "Reactiva", "desc": "Dispara más rápido.", "stats": {"fire_rate": -0.06}},
+		{"id": "iman", "min_rarity": 1, "cost": 2, "adj": "Magnético", "adj_f": "Magnética", "desc": "Atrae la chatarra desde más lejos."},
+		{"id": "regenerador", "min_rarity": 1, "cost": 3, "adj": "Regenerador", "adj_f": "Regeneradora", "desc": "+1 vida cada 10 s."},
+		{"id": "vampiro", "min_rarity": 2, "cost": 4, "adj": "Vampírico", "adj_f": "Vampírica", "desc": "Recuperas 1 vida cada pocas muertes."},
+		{"id": "mochila", "min_rarity": 0, "cost": 2, "adj": "Acolchado", "adj_f": "Acolchada", "desc": "+1 vida máxima.", "stats": {"max_hp": 1}},
 	],
 }
 
