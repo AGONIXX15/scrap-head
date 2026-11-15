@@ -5,7 +5,7 @@ const SFX_HIT := preload("res://game/audio/sfx/hit.wav")
 const SFX_EXPLODE := preload("res://game/audio/sfx/explode.wav")
 const SFX_PICKUP := preload("res://game/audio/sfx/pickup.wav")
 const SFX_EQUIP := preload("res://game/audio/sfx/equip.wav")
-var music_battle: AudioStream = preload("res://game/audio/music/battle.wav")
+var music_battle: AudioStream = preload("res://game/audio/music/cubedcanada+invaderloop.mp3")
 
 const POOL_SIZE := 12
 
@@ -15,7 +15,7 @@ var _music_player: AudioStreamPlayer
 var _fade_tween: Tween
 
 var sfx_volume_db := -2.0
-var music_volume_db := 0.0
+var music_volume_db := -4.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -82,7 +82,9 @@ func play_music(stream: AudioStream = null, volume_offset_db: float = 0.0) -> vo
 	
 	if stream == null:
 		stream = music_battle
-	if stream is AudioStreamWAV:
+	if stream is AudioStreamMP3:
+		(stream as AudioStreamMP3).loop = true
+	elif stream is AudioStreamWAV:
 		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 	
 	_music_player.stream = stream
