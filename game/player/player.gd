@@ -163,6 +163,7 @@ func equip(part: Part) -> void:
 	var layer: Sprite2D = layers[part.slot]
 	layer.texture = part.texture
 	layer.hframes = part.frames()
+	PartGenerator.dress(layer, part)
 	if _extras.has(part.slot):
 		_extras[part.slot].queue_free()
 		_extras.erase(part.slot)
@@ -217,6 +218,15 @@ func spawn_bullet(pos: Vector2, direction: Vector2) -> void:
 	b.max_range = shoot_range
 	b.global_position = pos
 	get_tree().current_scene.add_child(b)
+
+func effect_count(id: String) -> int:
+	var n := 0
+	for p: Part in parts.values():
+		n += p.effects.count(id)
+	return n
+
+func has_effect(id: String) -> bool:
+	return effect_count(id) > 0
 
 func _stat(key: String) -> float:
 	var s := 0.0
