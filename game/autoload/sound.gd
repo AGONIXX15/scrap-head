@@ -5,16 +5,21 @@ const SFX_HIT := preload("res://game/audio/sfx/hit.wav")
 const SFX_EXPLODE := preload("res://game/audio/sfx/explode.wav")
 const SFX_PICKUP := preload("res://game/audio/sfx/pickup.wav")
 const SFX_EQUIP := preload("res://game/audio/sfx/equip.wav")
+const MUSIC_BATTLE := preload("res://game/audio/music/battle.wav")
 
 const POOL_SIZE := 12
 
 var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
+var _music_player: AudioStreamPlayer
 
 var sfx_volume_db := -2.0
+var music_volume_db := -8.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	# Pool para efectos de sonido (SFX)
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
 		p.name = "SfxPlayer_%d" % i
@@ -22,11 +27,20 @@ func _ready() -> void:
 		add_child(p)
 		_players.append(p)
 
+	# Reproductor dedicado para música de fondo
+	_music_player = AudioStreamPlayer.new()
+	_music_player.name = "MusicPlayer"
+	_music_player.bus = "Master"
+	add_child(_music_player)
+
+	# Habilitar bucle (loop) en la música
+	if MUSIC_BATTLE is AudioStreamWAV:
+		(MUSIC_BATTLE as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+
 func play_sfx(stream: AudioStream, volume_offset_db := 0.0, pitch_variance := 0.06) -> void:
 	if not stream or _players.is_empty():
 		return
 	
-	# Buscar un reproductor libre; si no, usar el siguiente en turno (round-robin)
 	var player: AudioStreamPlayer = null
 	for p in _players:
 		if not p.playing:
@@ -55,3 +69,25 @@ func play_pickup() -> void:
 
 func play_equip() -> void:
 	play_sfx(SFX_EQUIP, -1.0, 0.04)
+
+func play_music(stream: AudioStream = null, volume_db: float = 0.0) -> void:
+	if stream == null:
+		stream = MUSIC_BATTLE
+	if stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	if _music_player.stream == stream and _music_player.playing:
+		return
+	_music_player.stream = stream
+	_music_player.volume_db = music_volume_db + volume_db
+	_music_player.play()
+
+func stop_music() -> void:
+	if _music_player:
+		_music_player.stop()
+
+func fade_music_out(duration := 0.5) -> void:
+	if not _music_player or not _music_player.playing:
+		return
+	var tw := create_tween()
+	tw.tween_property(_music_player, "volume_db", -60.0, duration)
+	tw.tween_callback(_music_player.stop)
