@@ -18,6 +18,8 @@ const TITLE_OUTLINE := 6
 const BUTTON_FONT_SIZE := 10
 const BUTTON_OUTLINE := 3
 
+var _player_dead := false
+
 @onready var panel: PanelContainer = %Panel
 @onready var title: Label = %Title
 @onready var btn_resume: Button = %BtnResume
@@ -31,6 +33,9 @@ func _ready() -> void:
 	btn_resume.pressed.connect(resume)
 	btn_restart.pressed.connect(restart)
 	btn_quit.pressed.connect(quit_game)
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_signal("died"):
+		player.died.connect(func() -> void: _player_dead = true)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE):
@@ -43,13 +48,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 func _can_pause() -> bool:
-	var workshop := get_tree().get_first_node_in_group("workshop")
-	if workshop and is_instance_valid(workshop) and workshop.is_inside_tree():
-		return false
-	var player := get_tree().get_first_node_in_group("player")
-	if player and is_instance_valid(player) and "hp" in player and player.hp <= 0:
-		return false
-	return true
+	return not (get_tree().paused or _player_dead)
 
 func pause() -> void:
 	get_tree().paused = true

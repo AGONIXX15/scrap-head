@@ -47,8 +47,9 @@ func _spawn() -> void:
 	remove_from_group("spawn_warning")
 	queue_redraw()
 	enemy.position = position
+	parent.add_child(enemy)  # _ready fija la escala final (élite incluida)
+	var target := enemy.scale
 	enemy.scale = Vector2.ONE * START_SCALE
-	parent.add_child(enemy)
-	enemy.create_tween().tween_property(enemy, "scale", Vector2.ONE, POP_TIME)
+	enemy.create_tween().tween_property(enemy, "scale", target, POP_TIME)
 	dust.restart()
 	get_tree().create_timer(DUST_LIFE).timeout.connect(queue_free)
