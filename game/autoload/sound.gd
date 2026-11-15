@@ -5,7 +5,7 @@ const SFX_HIT := preload("res://game/audio/sfx/hit.wav")
 const SFX_EXPLODE := preload("res://game/audio/sfx/explode.wav")
 const SFX_PICKUP := preload("res://game/audio/sfx/pickup.wav")
 const SFX_EQUIP := preload("res://game/audio/sfx/equip.wav")
-const MUSIC_BATTLE := preload("res://game/audio/music/battle.wav")
+var music_battle: AudioStream = preload("res://game/audio/music/battle.wav")
 
 const POOL_SIZE := 12
 
@@ -34,8 +34,8 @@ func _ready() -> void:
 	add_child(_music_player)
 
 	# Habilitar bucle (loop) en la música
-	if MUSIC_BATTLE is AudioStreamWAV:
-		(MUSIC_BATTLE as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	if music_battle is AudioStreamWAV:
+		(music_battle as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 
 func play_sfx(stream: AudioStream, volume_offset_db := 0.0, pitch_variance := 0.06) -> void:
 	if not stream or _players.is_empty():
@@ -72,7 +72,7 @@ func play_equip() -> void:
 
 func play_music(stream: AudioStream = null, volume_db: float = 0.0) -> void:
 	if stream == null:
-		stream = MUSIC_BATTLE
+		stream = music_battle
 	if stream is AudioStreamWAV:
 		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 	if _music_player.stream == stream and _music_player.playing:
