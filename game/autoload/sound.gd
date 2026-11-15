@@ -15,7 +15,7 @@ var _music_player: AudioStreamPlayer
 var _fade_tween: Tween
 
 var sfx_volume_db := -2.0
-var music_volume_db := -2.0
+var music_volume_db := 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
