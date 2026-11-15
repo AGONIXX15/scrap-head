@@ -9,7 +9,10 @@ const FRAMES := [preload("res://game/workshop/sprites/frame_chatarra.png"),
 const SCRAP_ICON := preload("res://game/parts/scrap/scrap.png")
 const SCRAP_ICON_SIZE := 8
 const LEGENDARY := 2
-const LEGENDARY_FROM_WAVE := 3
+const LEGENDARY_FROM_WAVE := PartGenerator.LEGENDARY_FROM_WAVE
+const GENERATED_BASE := 0.25
+const GENERATED_PER_WAVE := 0.2
+const GENERATED_MAX := 0.9
 const WEIGHT_BASE := [6.0, 3.0, 1.0]
 const WEIGHT_PER_WAVE := [-1.0, 0.5, 0.5]
 const MIN_WEIGHT := 0.5
@@ -153,11 +156,13 @@ func _show_part(part: Part) -> void:
 	var l: Sprite2D = _layers[part.slot]
 	l.texture = part.texture
 	l.hframes = part.frames()
+	PartGenerator.dress(l, part)
 
 func _restore(slot: String) -> void:
 	var l: Sprite2D = _layers[slot]
 	l.texture = _base[slot][0]
 	l.hframes = _base[slot][1]
+	PartGenerator.dress(l, player.parts.get(slot))
 
 func _deal() -> void:
 	for c in _cards:
@@ -175,18 +180,35 @@ func _roll() -> Array[Part]:
 	var left := _pool.filter(func(p: Part): return p not in equipped and _weight(p) > 0.0)
 	var out: Array[Part] = []
 	var slots := []
-	while out.size() < OFFERS and not left.is_empty():
+	var generated := clampf(GENERATED_BASE + GENERATED_PER_WAVE * wave, 0.0, GENERATED_MAX)
+	while out.size() < OFFERS:
 		var fresh := left.filter(func(p: Part): return p.slot not in slots)
-		var p := _pick(fresh if not fresh.is_empty() else left)
+		var p: Part
+		if fresh.is_empty() or randf() < generated:
+			var free := SLOT_NAMES.keys().filter(func(s: String): return s not in slots)
+			p = PartGenerator.make(free.pick_random(), _roll_rarity(), wave)
+		else:
+			p = _pick(fresh)
+			left.erase(p)
 		out.append(p)
 		slots.append(p.slot)
-		left.erase(p)
 	return out
 
-func _weight(p: Part) -> float:
-	if p.rarity == LEGENDARY and wave < LEGENDARY_FROM_WAVE:
+func _roll_rarity() -> int:
+	var r := randf() * (_rarity_weight(0) + _rarity_weight(1) + _rarity_weight(2))
+	for i in 3:
+		r -= _rarity_weight(i)
+		if r <= 0.0:
+			return i
+	return 0
+
+func _rarity_weight(rarity: int) -> float:
+	if rarity == LEGENDARY and wave < LEGENDARY_FROM_WAVE:
 		return 0.0
-	return maxf(WEIGHT_BASE[p.rarity] + WEIGHT_PER_WAVE[p.rarity] * wave, MIN_WEIGHT)
+	return maxf(WEIGHT_BASE[rarity] + WEIGHT_PER_WAVE[rarity] * wave, MIN_WEIGHT)
+
+func _weight(p: Part) -> float:
+	return _rarity_weight(p.rarity)
 
 func _pick(from: Array) -> Part:
 	var total := 0.0
@@ -231,6 +253,7 @@ func _make_card(i: int, part: Part) -> Control:
 	icon.texture = atlas
 	icon.custom_minimum_size = Vector2.ONE * ICON_FRAME * ICON_SCALE
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	PartGenerator.dress_icon(icon, part)
 	box.add_child(icon)
 
 	box.add_child(_label(part.name, NAME_SIZE, TEXT_COLOR, true))
@@ -297,6 +320,7 @@ func _choose(i: int) -> void:
 	var fly := Sprite2D.new()
 	fly.texture = icon.texture
 	fly.scale = Vector2.ONE * ICON_SCALE
+	PartGenerator.dress(fly, part)
 	fly.global_position = icon.global_position + icon.size / 2.0
 	for c in _cards:
 		create_tween().tween_property(c, "modulate:a", FADE_ALPHA, FADE_TIME)

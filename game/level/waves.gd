@@ -9,7 +9,7 @@ const WORKSHOP := preload("res://game/workshop/workshop.tscn")
 const WARNING := preload("res://game/level/spawn_warning.tscn")
 const ARENA := Vector2(1280, 720)
 const MARGIN := 48.0
-const MAX_ENEMIES := 40
+const MAX_ENEMIES := 80
 const MIN_DIST := 200.0
 const SPAWN_TRIES := 8
 const INTERIOR_MIN_DIST := 280.0
@@ -22,9 +22,9 @@ const PRESS := "res://game/enemies/prensa/prensa.tscn"
 const WAVES := [
 	{"time": 40.0, "interval": 1.4, "burst": 1, "cap": 12, "mix": {OXIDADO: 1.0}},
 	{"time": 40.0, "interval": 1.2, "burst": 1, "cap": 16, "mix": {OXIDADO: 3.0, SPARK: 2.0}},
-	{"time": 40.0, "interval": 1.1, "burst": 1, "cap": 20, "mix": {OXIDADO: 3.0, SPARK: 2.0, RIVETER: 1.0}},
-	{"time": 40.0, "interval": 1.0, "burst": 2, "cap": 26, "mix": {OXIDADO: 4.0, SPARK: 3.0, RIVETER: 1.0, PRESS: 1.0}},
-	{"time": 40.0, "interval": 1.6, "burst": 4, "cap": MAX_ENEMIES, "mix": {OXIDADO: 4.0, SPARK: 3.0, RIVETER: 2.0, PRESS: 2.0}},
+	{"time": 40.0, "interval": 1.0, "burst": 2, "cap": 32, "mix": {OXIDADO: 3.0, SPARK: 2.0, RIVETER: 1.0}},
+	{"time": 40.0, "interval": 0.9, "burst": 3, "cap": 48, "mix": {OXIDADO: 4.0, SPARK: 3.0, RIVETER: 1.0, PRESS: 1.0}},
+	{"time": 40.0, "interval": 1.4, "burst": 6, "cap": MAX_ENEMIES, "mix": {OXIDADO: 4.0, SPARK: 3.0, RIVETER: 2.0, PRESS: 2.0}},
 ]
 const ELITE_FROM_WAVE := 3
 const ELITE_CHANCE := 0.12

@@ -267,6 +267,7 @@ func update_parts(parts: Dictionary) -> void:
 			atlas.region = Rect2(0, 0, Part.FRAME_SIZE, Part.FRAME_SIZE)
 			icon.texture = atlas
 			icon.modulate = Color.WHITE
+			PartGenerator.dress_icon(icon, current_part)
 
 			var sb := StyleBoxTexture.new()
 			sb.texture = FRAMES[current_part.rarity]
@@ -281,6 +282,7 @@ func update_parts(parts: Dictionary) -> void:
 				_pop(frame)
 		else:
 			icon.texture = null
+			PartGenerator.dress_icon(icon, null)
 			frame.add_theme_stylebox_override("panel", _empty_style)
 			frame.tooltip_text = "Ranura: %s (vacía)" % SLOT_TITLES[slot]
 			label.add_theme_color_override("font_color", LABEL_COLOR)

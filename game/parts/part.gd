@@ -13,6 +13,10 @@ const FRAME_SIZE := 32
 @export var texture: Texture2D
 @export var stats: Dictionary
 @export var scene: PackedScene
+# Solo piezas generadas (ver PartGenerator); -1 = sin material
+@export var material := -1
+@export var accessories: Array[Texture2D]
+@export var effects: Array[String]
 
 func frames() -> int:
 	return int(texture.get_width() / float(FRAME_SIZE))

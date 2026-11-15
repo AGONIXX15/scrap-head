@@ -44,11 +44,11 @@ func _physics_process(delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if not _landed or player == null:
 		return
-	if _pull or global_position.distance_to(player.global_position) < MAGNET_RADIUS:
+	if _pull or global_position.distance_to(player.global_position) < MAGNET_RADIUS + player.magnet:
 		_speed += MAGNET_ACCEL * delta
 		global_position = global_position.move_toward(player.global_position, _speed * delta)
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player") and body.hp > 0:
-		body.add_scrap(1)
+		body.add_scrap(1 + body.effect_count("tasador"))
 		queue_free()

@@ -19,6 +19,14 @@ const WARN_BASE_ALPHA := 0.15
 const WARN_FILL_ALPHA := 0.45
 const WARN_LINE := 1.0
 const WARN_POINTS := 48
+const BURN_TIME := 2.0
+const BURN_TICK := 0.5
+const BURN_COLOR := Color(1.6, 0.8, 0.4)
+const COLD_TIME := 2.0
+const COLD_MULT := 0.5
+const COLD_COLOR := Color(0.5, 0.8, 1.6)
+const MARK_TIME := 3.0
+const MARK_COLOR := Color(1.6, 0.6, 1.6)
 
 @export var speed := 60.0
 @export var hp := 3
@@ -44,14 +52,24 @@ var _warn_fill := 0.0
 var _dead := false
 var speed_mult := 1.0
 var _oil_count := 0
+var _oil_factor := 1.0
+var _base_tint := Color.WHITE
+var _burn := 0.0
+var _burn_tick := 0.0
+var _flash_tween: Tween
+var _cold := 0.0
+var _mark := 0.0
+var mark_bonus := 0  # daño extra por golpe mientras está marcado (Marcador)
 
 func _ready() -> void:
+	set_process(false)  # solo hace falta con quemadura o frío
 	_player = get_tree().get_first_node_in_group("player")
 	if elite:
 		hp *= ELITE_HP_MULT
 		scrap_value *= ELITE_SCRAP_MULT
 		scale = Vector2.ONE * ELITE_SCALE
-		_tint = ELITE_COLOR
+		_base_tint = ELITE_COLOR
+		_tint = _base_tint
 		sprite.modulate = _tint
 	_max_hp = hp
 	for n: Node2D in [_bar, _warn]:
@@ -75,9 +93,14 @@ func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 		_die()
 		return
 	# SFX: hit
-	_knock = from_dir * KNOCKBACK * knock_scale
+	if from_dir != Vector2.ZERO:  # el daño por estado (quemadura, ácido) no cancela el empuje
+		_knock = from_dir * KNOCKBACK * knock_scale
+	if _flash_tween:
+		_flash_tween.kill()
 	sprite.modulate = FLASH_COLOR
-	create_tween().tween_property(sprite, "modulate", _tint, FLASH_TIME)
+	# lee _tint en cada paso: si un estado cambia el tinte durante el flash, no lo pisa
+	_flash_tween = create_tween()
+	_flash_tween.tween_method(func(t: float): sprite.modulate = FLASH_COLOR.lerp(_tint, t), 0.0, 1.0, FLASH_TIME)
 
 func sweep() -> void:
 	hp = 0
@@ -99,18 +122,74 @@ func _die(juice := true) -> void:
 		b.global_position = global_position + Vector2.from_angle(randf() * TAU) * randf_range(0.0, SCRAP_SPREAD)
 		scene.add_child.call_deferred(b)
 	if juice:
+		if is_instance_valid(_player):
+			_player.enemy_killed()
 		Juice.hitstop()
 		Juice.shake(death_shake)
 	queue_free()
 
 func set_oil_slow(factor: float) -> void:
 	_oil_count += 1
-	speed_mult = factor
+	_oil_factor = factor
+	_refresh_status()
 
 func remove_oil_slow() -> void:
 	_oil_count = maxi(_oil_count - 1, 0)
-	if _oil_count == 0:
-		speed_mult = 1.0
+	_refresh_status()
+
+# Ígneo: 1 de daño cada BURN_TICK durante duration; reaplicar refresca.
+func burn(duration := BURN_TIME) -> void:
+	_burn = duration
+	set_process(true)
+	_refresh_status()
+
+# Criogénico: ralentiza a la mitad durante duration; se combina con el aceite.
+func freeze(duration := COLD_TIME) -> void:
+	_cold = duration
+	set_process(true)
+	_refresh_status()
+
+# Marcador: +n de daño por golpe durante duration.
+func mark(n: int, duration := MARK_TIME) -> void:
+	mark_bonus = n
+	_mark = duration
+	set_process(true)
+	_refresh_status()
+
+func _process(delta: float) -> void:
+	if _mark > 0.0:
+		_mark -= delta
+		if _mark <= 0.0:
+			mark_bonus = 0
+			_refresh_status()
+	if _burn > 0.0:
+		_burn -= delta
+		_burn_tick += delta
+		if _burn_tick >= BURN_TICK:
+			_burn_tick -= BURN_TICK
+			hit(1)
+		if _burn <= 0.0:
+			_refresh_status()
+	if _cold > 0.0:
+		_cold -= delta
+		if _cold <= 0.0:
+			_refresh_status()
+	if _burn <= 0.0 and _cold <= 0.0 and _mark <= 0.0:
+		set_process(false)
+
+func _oil_mult() -> float:
+	return _oil_factor if _oil_count > 0 else 1.0
+
+func _refresh_status() -> void:
+	speed_mult = _oil_mult() * (COLD_MULT if _cold > 0.0 else 1.0)
+	_tint = _base_tint
+	if _burn > 0.0:
+		_tint *= BURN_COLOR
+	if _cold > 0.0:
+		_tint *= COLD_COLOR
+	if _mark > 0.0:
+		_tint *= MARK_COLOR
+	sprite.modulate = _tint
 
 func _on_death() -> void:
 	pass
