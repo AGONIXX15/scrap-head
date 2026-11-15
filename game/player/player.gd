@@ -52,6 +52,11 @@ const DEBRIS_TIME := 0.8
 const DEBRIS_FADE_DELAY := 0.5
 const DEBRIS_FADE_TIME := 0.4
 const RELOAD_DELAY := 1.0
+const MAX_SHOTS := 9
+const TWIN_ARC := 8.0  # grados a cada lado (gemelo)
+const SHOTGUN_ARC := 20.0  # grados a cada lado (escopeta)
+const SHOTGUN_PELLETS := 4  # balas extra por escopeta
+const SHOTGUN_RANGE := 0.4
 
 @export var base_speed := 150.0
 @export var base_max_hp := 5
@@ -208,14 +213,18 @@ func nearest_enemy(from: Vector2, max_dist: float) -> Vector2:
 			target = e.global_position
 	return target
 
-func spawn_bullet(pos: Vector2, direction: Vector2) -> void:
+func spawn_bullet(pos: Vector2, direction: Vector2, range_mult := 1.0) -> void:
 	var b := BULLET.instantiate()
 	b.direction = direction
 	b.damage = damage
 	b.pierce = pierce
 	b.bounces = bounces
 	b.is_disc = bounces > 0
-	b.max_range = shoot_range
+	b.max_range = shoot_range * range_mult
+	b.scale = Vector2.ONE * (1 + effect_count("colosal"))
+	for p: Part in parts.values():
+		for id in p.effects:
+			b.effects[id] = b.effects.get(id, 0) + 1
 	b.global_position = pos
 	get_tree().current_scene.add_child(b)
 
@@ -236,9 +245,9 @@ func _stat(key: String) -> float:
 
 func _recalc() -> void:
 	speed = base_speed + _stat("speed")
-	max_hp = base_max_hp + int(_stat("max_hp"))
+	max_hp = maxi(base_max_hp + int(_stat("max_hp")), 1)
 	fire_rate = maxf(base_fire_rate + _stat("fire_rate"), MIN_FIRE_RATE)
-	damage = base_damage + int(_stat("damage"))
+	damage = maxi(base_damage + int(_stat("damage")), 1)
 	shoot_range = base_range + _stat("range")
 	pierce = base_pierce + int(_stat("pierce"))
 	bounces = base_bounces + int(_stat("bounces"))
@@ -250,7 +259,12 @@ func _recalc() -> void:
 
 func _shoot(direction: Vector2) -> void:
 	# SFX: shoot
-	spawn_bullet(muzzle.global_position, direction)
+	var shotgun := effect_count("escopeta")
+	var n := mini(1 + effect_count("gemelo") + SHOTGUN_PELLETS * shotgun, MAX_SHOTS)
+	var half := SHOTGUN_ARC if shotgun > 0 else TWIN_ARC
+	for i in n:
+		var a := lerpf(-half, half, i / float(n - 1)) if n > 1 else 0.0
+		spawn_bullet(muzzle.global_position, direction.rotated(deg_to_rad(a)), SHOTGUN_RANGE if shotgun > 0 else 1.0)
 	muzzle.show()
 	muzzle.frame = 0
 	var t := create_tween()

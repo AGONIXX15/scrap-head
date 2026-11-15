@@ -52,11 +52,23 @@ const ACCESSORIES := {
 }
 
 # Efectos por ranura (min_rarity y cost en puntos del presupuesto); para ampliar, añadir entradas aquí (adj_f = femenino si difiere).
-# En esta fase solo hay efectos que el juego ya sabe aplicar (stats o escena).
+# Efectos de brazo (bala): se aplican en bullet.gd / player.gd según el id; los que cambian stats lo hacen aquí.
 const EFFECTS := {
 	Part.ARM: [
 		{"id": "perforante", "min_rarity": 1, "cost": 2, "adj": "Perforante", "desc": "Las balas atraviesan enemigos.", "stats": {"pierce": 1}},
 		{"id": "rebotador", "min_rarity": 1, "cost": 2, "adj": "Rebotador", "adj_f": "Rebotadora", "desc": "Las balas rebotan en las paredes.", "stats": {"bounces": 1}},
+		{"id": "igneo", "min_rarity": 1, "cost": 2, "adj": "Ígneo", "adj_f": "Ígnea", "desc": "Quema a los enemigos."},
+		{"id": "criogenico", "min_rarity": 1, "cost": 2, "adj": "Criogénico", "adj_f": "Criogénica", "desc": "Ralentiza a los enemigos."},
+		{"id": "electrico", "min_rarity": 1, "cost": 3, "adj": "Eléctrico", "adj_f": "Eléctrica", "desc": "El impacto salta a enemigos cercanos."},
+		{"id": "explosivo", "min_rarity": 1, "cost": 3, "adj": "Explosivo", "adj_f": "Explosiva", "desc": "Las balas explotan al impactar."},
+		{"id": "fragmentador", "min_rarity": 1, "cost": 3, "adj": "Fragmentador", "adj_f": "Fragmentadora", "desc": "Las balas se parten en tres al impactar."},
+		{"id": "buscador", "min_rarity": 1, "cost": 2, "adj": "Buscador", "adj_f": "Buscadora", "desc": "Las balas persiguen al enemigo cercano."},
+		{"id": "boomerang", "min_rarity": 1, "cost": 3, "adj": "Boomerang", "desc": "Las balas vuelven hacia ti."},
+		{"id": "colosal", "min_rarity": 1, "cost": 3, "adj": "Colosal", "desc": "Balas enormes, más daño y más lentas.", "stats": {"damage": 1, "fire_rate": 0.1}},
+		{"id": "gemelo", "min_rarity": 1, "cost": 2, "adj": "Gemelo", "adj_f": "Gemela", "desc": "Dispara dos balas a la vez."},
+		{"id": "escopeta", "min_rarity": 1, "cost": 3, "adj": "Perdigonero", "adj_f": "Perdigonera", "desc": "Cinco perdigones de poco alcance, más lenta.", "stats": {"fire_rate": 0.1}},
+		{"id": "hidraulico", "min_rarity": 1, "cost": 2, "adj": "Hidráulico", "adj_f": "Hidráulica", "desc": "Empuja a los enemigos con fuerza."},
+		{"id": "acido", "min_rarity": 1, "cost": 3, "adj": "Ácido", "adj_f": "Ácida", "desc": "Deja charcos de ácido."},
 	],
 	Part.HEAD: [
 		{"id": "autoapuntado", "min_rarity": 2, "cost": 3, "adj": "Autoapuntado", "adj_f": "Autoapuntada", "desc": "Apunta y dispara solo.", "stats": {"auto_aim": 1}},
@@ -142,8 +154,10 @@ static func _roll_stats(slot: String, points: int, bias: String) -> Dictionary:
 	keys.shuffle()
 	var counts := {}
 	# un stat negativo devuelve sus puntos; el sesgo del material va primero
-	if keys.size() > 1 and randf() < NEGATIVE_CHANCE:
-		var neg: String = keys.filter(func(k: String): return k != bias).pick_random()
+	# el daño nunca va en negativo: con daño base 1 la pieza quedaría inútil
+	var neg_keys := keys.filter(func(k: String): return k != bias and k != "damage")
+	if keys.size() > 1 and not neg_keys.is_empty() and randf() < NEGATIVE_CHANCE:
+		var neg: String = neg_keys.pick_random()
 		keys.erase(neg)
 		counts[neg] = -1
 		points += STAT_COST[neg][1]
