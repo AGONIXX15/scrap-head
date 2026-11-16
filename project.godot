@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7")
 Juice="*res://game/autoload/juice.gd"
 Spatial="*res://game/autoload/spatial.gd"
 Sound="*res://game/autoload/sound.gd"
+Audio="*res://game/autoload/audio.gd"
 
 [display]
 
