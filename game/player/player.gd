@@ -65,7 +65,7 @@ const DASH_COOLDOWN_MIN := 0.6
 const BERSERK_RATE := 0.35  # cadencia extra por copia con la mitad de vida o menos
 const TELESCOPE_SPEED := 0.2  # velocidad extra de bala por copia
 const TELESCOPE_MAX := 3
-const MAGNET_PER := 40.0
+const MAGNET_PER := 60.0
 const VAMPIRE_KILLS := 12  # muertes por vida con una copia; baja 3 por copia extra (mínimo 3)
 
 @export var base_speed := 150.0
