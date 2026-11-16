@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Part" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/parts/part.gd" id="1"]
+[ext_resource type="Texture2D" path="res://game/parts/sprites/part_propulsor.png" id="2"]
+[ext_resource type="PackedScene" path="res://game/parts/propulsor/propulsor.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+name = "Propulsor"
+slot = "legs"
+texture = ExtResource("2")
+stats = {}
+scene = ExtResource("3")
+rarity = 1
+description = "Botas cohete de escape. Pulsa Espacio para ejecutar un dash invulnerable con fogonazo."
+effects = Array[String](["propulsor"])
