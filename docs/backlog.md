@@ -40,9 +40,9 @@ Como jugador quiero una arena con ambientación de fábrica abandonada para sent
 
 ### HU-06 Efectos y sonidos básicos
 Como jugador quiero oír y ver el resultado de mis acciones para tener retroalimentación.
-- [ ] Sonido de disparo, golpe y explosión.
-- [ ] Efecto visual al morir un enemigo.
-- [ ] Música de fondo en bucle.
+- [x] Sonido de disparo, golpe y explosión.
+- [x] Efecto visual al morir un enemigo.
+- [x] Música de fondo en bucle.
 
 ### HU-15 Piezas visibles
 Como jugador quiero que las piezas que equipo se vean en mi robot y cambien mis stats para sentir progreso.

@@ -56,6 +56,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_player_died() -> void:
 	_active = true
+	Sound.fade_music_out(DEFEAT_DELAY)
 	await get_tree().create_timer(DEFEAT_DELAY, true, false, true).timeout
 	if not is_inside_tree():
 		return
