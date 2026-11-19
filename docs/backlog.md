@@ -42,7 +42,15 @@ Como jugador quiero una arena con ambientación de fábrica abandonada para sent
 Como jugador quiero oír y ver el resultado de mis acciones para tener retroalimentación.
 - [x] Sonido de disparo, golpe y explosión.
 - [x] Efecto visual al morir un enemigo.
-- [x] Música de fondo en bucle.
+- [x] Música de fondo en bucle (ver HU-19).
+
+### HU-19 Música adaptativa
+Como jugador quiero que la música acompañe la intensidad del combate para sentir la presión de cada oleada.
+- [x] Música de combate en bucle durante las oleadas.
+- [x] Música tranquila propia en el taller; la de combate se pausa y se reanuda al cerrarlo.
+- [x] Con más enemigos vivos la música se abre (filtro pasa-bajos) y acelera un poco; con pocos suena apagada.
+- [x] Pistas CC0 de freesound.org con créditos en el README.
+- [ ] Música del menú principal (pista ya en `game/menu/audio/`, falta el menú, ver HU-07).
 
 ### HU-15 Piezas visibles
 Como jugador quiero que las piezas que equipo se vean en mi robot y cambien mis stats para sentir progreso.

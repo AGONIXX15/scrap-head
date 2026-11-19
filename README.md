@@ -44,4 +44,8 @@ docs/            GDD, backlog y guía de piezas
 
 ## Créditos
 
-Arte y audio propios.
+Arte y audio propios, salvo la música (CC0, [freesound.org](https://freesound.org)):
+
+- Combate: [Synth Metal Rock Loop](https://freesound.org/people/furbyguy/sounds/361424/) por furbyguy.
+- Taller: [GreyMorning](https://freesound.org/people/edemson86/sounds/324264/) por edemson86.
+- Menú: [cyberpunk_metal](https://freesound.org/people/Bertsz/sounds/672783/) por Bertsz.

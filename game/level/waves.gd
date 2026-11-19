@@ -18,6 +18,10 @@ const SPARK := "res://game/enemies/chispa/chispa.tscn"
 const RIVETER := "res://game/enemies/remachadora/remachadora.tscn"
 const INTERIOR := [RIVETER]
 const PRESS := "res://game/enemies/prensa/prensa.tscn"
+const MUSIC_MAX_PITCH := 1.1
+const MUSIC_MIN_CUTOFF := 900.0
+const MUSIC_MAX_CUTOFF := 20000.0
+const MUSIC_SMOOTH := 1.5
 # time: duración (s), interval: segundos entre tandas, burst: enemigos por tanda, cap: tope de vivos
 const WAVES := [
 	{"time": 40.0, "interval": 1.4, "burst": 1, "cap": 12, "mix": {OXIDADO: 1.0}},
@@ -50,7 +54,10 @@ var _mix: Dictionary = {}
 var _cap := MAX_ENEMIES
 var _left := 0.0
 var _tween: Tween
+var _intensity := 0.0
+var _lowpass: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("Music"), 0)
 
+@onready var music: AudioStreamPlayer = $"../Music"
 @onready var enemies: Node = $"../Enemies"
 @onready var player: Node2D = $"../Player"
 @onready var banner: Label = $UI/Banner
@@ -66,6 +73,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	tick.emit(delta)
+	# Música adaptativa: con más enemigos vivos se abre el filtro y acelera un poco.
+	var t := clampf(float(enemies.get_child_count()) / _cap, 0.0, 1.0)
+	_intensity = lerpf(_intensity, t, minf(1.0, MUSIC_SMOOTH * delta))
+	music.pitch_scale = lerpf(1.0, MUSIC_MAX_PITCH, _intensity)
+	_lowpass.cutoff_hz = lerpf(MUSIC_MIN_CUTOFF, MUSIC_MAX_CUTOFF, _intensity * _intensity)
 
 func _wait(t: float) -> void:
 	var tw := create_tween()
