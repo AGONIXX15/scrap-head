@@ -12,6 +12,10 @@ var _tick := 0.0
 
 @onready var sprite: Sprite2D = $Sprite
 
+func _ready() -> void:
+	if angle == 0.0:  # solo la primera sierra zumba: varias no apilan el bucle
+		$Whir.play()
+
 func _process(delta: float) -> void:
 	angle += delta * ORBIT_SPEED
 	position = Vector2.from_angle(angle) * ORBIT
@@ -22,3 +26,4 @@ func _process(delta: float) -> void:
 		for b in get_overlapping_bodies():
 			if b.has_method("hit"):
 				b.hit(1)
+				Sfx.play("enemy_hit", b.global_position, 1.4)

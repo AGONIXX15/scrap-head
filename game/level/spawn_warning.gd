@@ -48,6 +48,7 @@ func _spawn() -> void:
 	queue_redraw()
 	enemy.position = position
 	parent.add_child(enemy)  # _ready fija la escala final (élite incluida)
+	Sfx.play("spawn", position)
 	var target := enemy.scale
 	enemy.scale = Vector2.ONE * START_SCALE
 	enemy.create_tween().tween_property(enemy, "scale", target, POP_TIME)

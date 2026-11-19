@@ -313,6 +313,7 @@ func _choose(i: int) -> void:
 	if _busy:
 		return
 	_busy = true
+	Sfx.play("ui_click")
 	_refresh()
 	var part := _offers[i]
 	_show_part(part)
@@ -331,7 +332,7 @@ func _choose(i: int) -> void:
 	t.tween_property(fly, "scale", PREVIEW_SCALE, FLY_TIME)
 	await t.finished
 	fly.queue_free()
-	# SFX: equip
+	Sfx.play("equip")
 	_show_part(part)
 	sparks.restart()
 	robot.modulate = FLASH_COLOR
@@ -345,6 +346,7 @@ func _choose(i: int) -> void:
 func _reroll() -> void:
 	if _busy or player.scrap < _reroll_cost():
 		return
+	Sfx.play("ui_click")
 	player.add_scrap(-_reroll_cost())
 	_rerolls += 1
 	_deal()
@@ -352,6 +354,7 @@ func _reroll() -> void:
 func _skip() -> void:
 	if _busy:
 		return
+	Sfx.play("ui_click")
 	player.add_scrap(SKIP_REWARD)
 	_close()
 

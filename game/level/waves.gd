@@ -105,6 +105,7 @@ func _play(i: int) -> void:
 	_left = w.time * duration_mult
 	wave_started.emit(i + 1)
 	_show("OLEADA %d" % (i + 1), ORANGE)
+	Sfx.play("wave_start")
 	clock.show()
 	var acc := 0.0
 	while _left > 0.0:
@@ -120,6 +121,7 @@ func _play(i: int) -> void:
 	for s in get_tree().get_nodes_in_group("spawn_warning"):
 		s.queue_free()
 	_show("¡OLEADA SUPERADA!", AMBER)
+	Sfx.play("wave_clear")
 	for e in enemies.get_children():
 		if is_instance_valid(e):
 			e.sweep()

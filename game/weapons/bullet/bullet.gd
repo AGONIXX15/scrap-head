@@ -137,7 +137,7 @@ func _bounce() -> void:
 		rotation = direction.angle()
 
 	if not quiet:
-		Sound.play_hit()
+		Sfx.play("ricochet", global_position)
 		var fx := IMPACT.instantiate()
 		fx.global_position = global_position
 		fx.rotation = normal.angle()
@@ -160,7 +160,6 @@ func _impact(hurt: bool) -> void:
 	if is_queued_for_deletion():
 		return
 	if not quiet:
-		Sound.play_hit()
 		var fx := IMPACT.instantiate()
 		fx.global_position = global_position
 		fx.rotation = direction.angle() + PI

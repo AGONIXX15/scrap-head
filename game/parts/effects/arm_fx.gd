@@ -20,6 +20,8 @@ static func lightning(ctx: Node, source: Node2D, count: int, damage: int) -> voi
 	near.sort_custom(func(a: Node2D, b: Node2D):
 		return a.global_position.distance_to(source.global_position) < b.global_position.distance_to(source.global_position))
 	var from := source.global_position
+	if not near.is_empty():
+		Sfx.play("bolt", from)
 	for e: Node2D in near.slice(0, count):
 		var to := e.global_position
 		var line := Line2D.new()

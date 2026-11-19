@@ -39,7 +39,7 @@ func hit(amount: int, _from_dir := Vector2.ZERO) -> void:
 		explode()
 		return
 
-	Sound.play_hit()
+	Sfx.play("enemy_hit", global_position)
 	# Hit feedback if barrel has > 1 hp
 	sprite.modulate = FLASH_COLOR
 	create_tween().tween_property(sprite, "modulate", Color.WHITE, FLASH_TIME)
@@ -49,7 +49,6 @@ func explode() -> void:
 	if _exploded:
 		return
 	_exploded = true
-	Sound.play_explode()
 	exploded.emit()
 
 	# Hide barrel visual and disable collision

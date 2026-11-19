@@ -89,11 +89,10 @@ func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	_bar.visible = true
 	_bar.queue_redraw()
 	if hp <= 0:
-		Sound.play_explode()
 		_die()
 		return
-	Sound.play_hit()
-	if from_dir != Vector2.ZERO:  # el daño por estado (quemadura, ácido) no cancela el empuje
+	if from_dir != Vector2.ZERO:  # el daño por estado (quemadura, ácido) no cancela el empuje ni suena
+		Sfx.play("enemy_hit", global_position)
 		_knock = from_dir * KNOCKBACK * knock_scale
 	if _flash_tween:
 		_flash_tween.kill()
@@ -126,6 +125,7 @@ func _die(juice := true) -> void:
 			_player.enemy_killed()
 		Juice.hitstop()
 		Juice.shake(death_shake)
+		Sfx.chain("kill", global_position)
 	queue_free()
 
 func set_oil_slow(factor: float) -> void:

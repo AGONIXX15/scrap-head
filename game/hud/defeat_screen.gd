@@ -36,8 +36,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hide()
 	_setup_styles()
+	btn_retry.pressed.connect(Sfx.play.bind("ui_click"))
 	btn_retry.pressed.connect(restart)
 	if btn_quit:
+		btn_quit.pressed.connect(Sfx.play.bind("ui_click"))
 		btn_quit.pressed.connect(quit_game)
 
 	if not player:
@@ -56,12 +58,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_player_died() -> void:
 	_active = true
-	Sound.fade_music_out(DEFEAT_DELAY)
+	var music := get_tree().current_scene.get_node_or_null("Music")
+	if music:
+		create_tween().tween_property(music, "volume_db", -60.0, DEFEAT_DELAY)
 	await get_tree().create_timer(DEFEAT_DELAY, true, false, true).timeout
 	if not is_inside_tree():
 		return
 	get_tree().paused = true
 	show()
+	Sfx.play("defeat")
 	btn_retry.grab_focus()
 
 	dim.modulate.a = 0.0

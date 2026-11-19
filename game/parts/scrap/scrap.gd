@@ -51,4 +51,5 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player") and body.hp > 0:
 		body.add_scrap(1 + body.effect_count("tasador"))
+		Sfx.chain("pickup", global_position)
 		queue_free()

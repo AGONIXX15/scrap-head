@@ -23,4 +23,5 @@ func _process(delta: float) -> void:
 	var target: Vector2 = player.nearest_enemy(global_position, FIRE_RANGE)
 	if target != Vector2.INF:
 		player.spawn_bullet(global_position, global_position.direction_to(target))
+		Sound.play_sfx(Sound.SFX_SHOOT, -9.0, 0.08)
 		_cooldown = FIRE_EVERY

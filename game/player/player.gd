@@ -182,13 +182,15 @@ func take_damage(n: int) -> void:
 	if hp == 0 or _invuln > 0.0 or _dash_t > 0.0:
 		return
 	if fx.absorb():
+		Sfx.play("shield_block", global_position)
 		_invuln = INVULN_TIME
 		return
 	hp = maxi(hp - n, 0)
 	hp_changed.emit(hp, max_hp)
 	fx.thorns()
 	_flash()
-	Sound.play_hit()
+	if hp > 0:
+		Sfx.play("player_hurt", global_position)
 	if hp == 0:
 		_disassemble()
 		return
@@ -197,7 +199,6 @@ func take_damage(n: int) -> void:
 func equip(part: Part) -> void:
 	if hp == 0:
 		return
-	Sound.play_equip()
 	parts[part.slot] = part
 	var layer: Sprite2D = layers[part.slot]
 	layer.texture = part.texture
@@ -222,7 +223,6 @@ func equip(part: Part) -> void:
 	parts_changed.emit(parts)
 
 func add_scrap(n: int) -> void:
-	Sound.play_pickup()
 	scrap += n
 	scrap_changed.emit(scrap)
 
@@ -364,7 +364,7 @@ func _float_text(text: String) -> void:
 	t.chain().tween_callback(l.queue_free)
 
 func _disassemble() -> void:
-	Sound.play_explode()
+	Sfx.play("player_death", global_position, 1.0, 0.0, 0.0)
 	died.emit()
 	remove_from_group("player")
 	collision.set_deferred("disabled", true)

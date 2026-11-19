@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 			if global_position.distance_to(_player.global_position) < LUNGE_RANGE:
 				_state = State.WINDUP
 				_timer = WINDUP_TIME
-				# SFX: charge
+				Sfx.play("charge", global_position, 0.9)
 		State.WINDUP:
 			sprite.frame = OPEN_FRAME
 			sprite.position = Vector2(randf_range(-TREMBLE, TREMBLE), randf_range(-TREMBLE, TREMBLE))
