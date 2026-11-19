@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/workshop/workshop.gd" id="1"]
 [ext_resource type="Texture2D" path="res://game/shared/sprites/shadow.png" id="2"]
+[ext_resource type="AudioStream" path="res://game/workshop/audio/workshop_music.ogg" id="music"]
 
 [sub_resource type="Gradient" id="spark"]
 offsets = PackedFloat32Array(0, 1)
@@ -137,3 +138,8 @@ focus_mode = 0
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("music")
+volume_db = -6.0
+autoplay = true

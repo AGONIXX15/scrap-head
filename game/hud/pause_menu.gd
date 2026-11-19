@@ -30,6 +30,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hide()
 	_setup_styles()
+	for b in [btn_resume, btn_restart, btn_quit]:
+		b.pressed.connect(Sfx.play.bind("ui_click"))
 	btn_resume.pressed.connect(resume)
 	btn_restart.pressed.connect(restart)
 	btn_quit.pressed.connect(quit_game)
