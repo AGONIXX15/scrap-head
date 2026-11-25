@@ -69,4 +69,11 @@ func _shoot() -> void:
 	var s := SHOT.instantiate()
 	s.direction = Vector2.from_angle(barrel.rotation)
 	s.global_position = barrel.global_position + s.direction * MUZZLE_DIST
+	s.source_enemy = self
+	if genes:
+		if genes.attack_type == EnemyGenes.AttackType.HEAVY:
+			s.damage = 2
+			s.scale = Vector2.ONE * 1.3
+		elif genes.attack_type == EnemyGenes.AttackType.RAPID:
+			s.speed *= 1.3
 	get_tree().current_scene.add_child.call_deferred(s)

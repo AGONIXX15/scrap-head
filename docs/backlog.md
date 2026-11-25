@@ -83,6 +83,14 @@ Como jugador quiero un taller entre oleadas para armar mi robot.
 - [x] Elegir (clic o teclas 1/2/3) equipa la pieza con efecto y empieza la siguiente oleada.
 - [x] Re-roll con coste creciente en tornillos y opción de saltar a cambio de tornillos.
 
+### HU-20 Enemigos que evolucionan entre oleadas
+Como jugador quiero que las máquinas se adapten a mi forma de jugar para que cada oleada sea un reto nuevo.
+- [x] Cada enemigo tiene genes: velocidad, vida, tamaño, agresividad y tipo de ataque.
+- [x] Aptitud = daño hecho al jugador + tiempo sobrevivido.
+- [x] Entre oleadas se seleccionan los más aptos, se cruzan y mutan.
+- [x] Los genes tienen topes para que la dificultad no se dispare.
+- [x] Los genes se notan visualmente (color, tamaño, accesorios).
+
 ## Épica 2: Estructura de partida (Entrega 2)
 
 ### HU-07 Pantalla de título

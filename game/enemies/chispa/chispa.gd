@@ -40,17 +40,25 @@ func _physics_process(delta: float) -> void:
 	if _fuse >= 0.0:
 		_fuse -= delta
 		velocity = _knock
-		_telegraph(EXPLODE_RADIUS, 1.0 - _fuse / FUSE_TIME)
+		var explode_rad := EXPLODE_RADIUS * (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.HEAVY) else 1.0)
+		var fuse_dur := FUSE_TIME / (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+		_telegraph(explode_rad, 1.0 - _fuse / fuse_dur)
 		if _fuse <= 0.0:
-			if dist <= EXPLODE_RADIUS:
-				_player.take_damage(damage)
+			if dist <= explode_rad:
+				var dmg := damage + (1 if (genes and genes.attack_type == EnemyGenes.AttackType.HEAVY) else 0)
+				var prev_hp: int = _player.hp
+				_player.take_damage(dmg)
+				if _player.hp < prev_hp:
+					record_player_damage(prev_hp - _player.hp)
 			hp = 0
 			_die()
 			return
 	else:
 		var dir := global_position.direction_to(_player.global_position)
 		velocity = dir.rotated(sin(_t * ZIG_FREQ + _phase) * ZIG_ANGLE) * (speed * speed_mult) + _knock
-		if dist < TRIGGER_DIST:
-			_fuse = FUSE_TIME
+		var trig_dist := TRIGGER_DIST * (genes.aggression if genes else 1.0)
+		if dist < trig_dist:
+			var fuse_dur := FUSE_TIME / (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+			_fuse = fuse_dur
 			# SFX: charge
 	move_and_slide()

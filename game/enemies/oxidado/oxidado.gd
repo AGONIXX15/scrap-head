@@ -44,9 +44,11 @@ func _physics_process(delta: float) -> void:
 			velocity += dir * (speed * speed_mult)
 			_t += delta * (WALK_FPS * speed_mult)
 			sprite.frame = int(_t) % sprite.hframes
-			if global_position.distance_to(_player.global_position) < LUNGE_RANGE:
+			var lunge_rng := LUNGE_RANGE * (genes.aggression if genes else 1.0)
+			if global_position.distance_to(_player.global_position) < lunge_rng:
 				_state = State.WINDUP
-				_timer = WINDUP_TIME
+				var windup := WINDUP_TIME / (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+				_timer = windup
 				# SFX: charge
 		State.WINDUP:
 			sprite.frame = OPEN_FRAME
@@ -59,10 +61,12 @@ func _physics_process(delta: float) -> void:
 				sprite.position = Vector2.ZERO
 				_set_eye(true)
 		State.LUNGE:
-			velocity = _lunge_dir * (LUNGE_SPEED * speed_mult)
+			var lunge_spd := LUNGE_SPEED * (1.25 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+			velocity = _lunge_dir * (lunge_spd * speed_mult)
 			if _timer <= 0.0:
 				_state = State.RECOVER
-				_timer = RECOVER_TIME
+				var rec := RECOVER_TIME / (1.2 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+				_timer = rec
 				sprite.frame = CLOSED_FRAME
 		State.RECOVER:
 			if _timer <= 0.0:

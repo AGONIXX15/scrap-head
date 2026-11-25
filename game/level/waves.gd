@@ -46,6 +46,7 @@ const OUTLINE_COLOR := Color("1a1030")
 
 @export var duration_mult := 1.0
 
+var evolution := EvolutionManager.new()
 var _mix: Dictionary = {}
 var _cap := MAX_ENEMIES
 var _left := 0.0
@@ -112,6 +113,8 @@ func _play(i: int) -> void:
 		if is_instance_valid(e):
 			e.sweep()
 		await _wait(CHAIN_DELAY)
+	# Evolución genética entre oleadas
+	evolution.evolve_generation()
 	wave_cleared.emit(i + 1)
 	if i < WAVES.size() - 1:
 		get_tree().call_group("scrap", "attract")
@@ -135,6 +138,10 @@ func _spawn(wave: int) -> void:
 	if not interior and pos.distance_to(player.global_position) < MIN_DIST:
 		return
 	var e := scene.instantiate()
+	if e is EnemyBase:
+		e.species_path = scene.resource_path
+		e.genes = evolution.get_next_genes(scene.resource_path)
+		e.died_with_genes.connect(_on_enemy_died_with_genes)
 	if wave >= ELITE_FROM_WAVE and randf() < ELITE_CHANCE:
 		e.elite = true
 	var warn := WARNING.instantiate()
@@ -187,3 +194,6 @@ func _show(text: String, color: Color) -> void:
 	_tween.parallel().tween_property(banner, "modulate:a", 1.0, BANNER_IN)
 	_tween.tween_interval(BANNER_HOLD)
 	_tween.tween_property(banner, "modulate:a", 0.0, BANNER_OUT)
+
+func _on_enemy_died_with_genes(species: String, g: EnemyGenes) -> void:
+	evolution.record_genes(species, g)

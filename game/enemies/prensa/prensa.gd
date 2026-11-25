@@ -40,14 +40,18 @@ func _physics_process(delta: float) -> void:
 			velocity += global_position.direction_to(_player.global_position) * (speed * speed_mult)
 			_t += delta * (WALK_FPS * speed_mult)
 			sprite.frame = int(_t) % sprite.hframes
-			if _cooldown <= 0.0 and global_position.distance_to(_player.global_position) < SLAM_RANGE:
+			var slam_rng := SLAM_RANGE * (genes.aggression if genes else 1.0)
+			var slam_wnd := SLAM_WINDUP / (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+			if _cooldown <= 0.0 and global_position.distance_to(_player.global_position) < slam_rng:
 				_state = State.WINDUP
-				_timer = SLAM_WINDUP
+				_timer = slam_wnd
 				_ram_tween = create_tween()
-				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, SLAM_WINDUP)
+				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, slam_wnd)
 				# SFX: charge
 		State.WINDUP:
-			_telegraph(SLAM_RADIUS, 1.0 - _timer / SLAM_WINDUP)
+			var slam_rad := SLAM_RADIUS * (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.HEAVY) else 1.0)
+			var slam_wnd := SLAM_WINDUP / (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.RAPID) else 1.0)
+			_telegraph(slam_rad, 1.0 - _timer / slam_wnd)
 			if _timer <= 0.0:
 				_slam()
 		State.RECOVER:
@@ -72,5 +76,10 @@ func _slam() -> void:
 	var dust := DUST.instantiate()
 	dust.global_position = global_position
 	get_tree().current_scene.add_child.call_deferred(dust)
-	if global_position.distance_to(_player.global_position) <= SLAM_RADIUS:
-		_player.take_damage(SLAM_DAMAGE)
+	var slam_rad := SLAM_RADIUS * (1.3 if (genes and genes.attack_type == EnemyGenes.AttackType.HEAVY) else 1.0)
+	var slam_dmg := SLAM_DAMAGE + (1 if (genes and genes.attack_type == EnemyGenes.AttackType.HEAVY) else 0)
+	if global_position.distance_to(_player.global_position) <= slam_rad:
+		var prev_hp: int = _player.hp
+		_player.take_damage(slam_dmg)
+		if _player.hp < prev_hp:
+			record_player_damage(prev_hp - _player.hp)
