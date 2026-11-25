@@ -1,0 +1,227 @@
+[gd_scene load_steps=14 format=3 uid="uid://7u7nxmnub5fg"]
+
+[ext_resource type="Script" path="res://game/enemies/recicladora/recicladora.gd" id="1_boss"]
+[ext_resource type="Texture2D" path="res://game/enemies/prensa/sprites/prensa.png" id="2_body"]
+[ext_resource type="Texture2D" path="res://game/enemies/remachadora/sprites/canon.png" id="3_core"]
+[ext_resource type="Texture2D" path="res://game/parts/sprites/acc_head_antena.png" id="4_ant"]
+[ext_resource type="Texture2D" path="res://game/shared/sprites/light_cookie.png" id="5_cookie"]
+[ext_resource type="Texture2D" path="res://game/shared/sprites/shadow.png" id="6_shadow"]
+
+[sub_resource type="RectangleShape2D" id="main_body_shape"]
+size = Vector2(80, 70)
+
+[sub_resource type="CircleShape2D" id="core_shape"]
+radius = 18.0
+
+[sub_resource type="CircleShape2D" id="antenna_shape"]
+radius = 14.0
+
+[sub_resource type="CircleShape2D" id="inhibitor_shape"]
+radius = 28.0
+
+[sub_resource type="CircleShape2D" id="valve_shape"]
+radius = 12.0
+
+[sub_resource type="StyleBoxFlat" id="sb_bar_bg"]
+bg_color = Color(0.1, 0.08, 0.15, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.25, 0.4, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="sb_bar_fill"]
+bg_color = Color(0.9, 0.18, 0.22, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="Recicladora" type="CharacterBody2D" groups=["boss", "enemies"]]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_boss")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, 38)
+scale = Vector2(3.5, 2.2)
+texture = ExtResource("6_shadow")
+
+[node name="BodySprite" type="Sprite2D" parent="."]
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("2_body")
+hframes = 4
+
+[node name="MainCollision" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("main_body_shape")
+
+[node name="Core" type="Area2D" parent="." groups=["boss_core"]]
+collision_layer = 4
+collision_mask = 8
+
+[node name="CoreSprite" type="Sprite2D" parent="Core"]
+position = Vector2(0, 2)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("3_core")
+hframes = 2
+frame = 1
+
+[node name="CoreShape" type="CollisionShape2D" parent="Core"]
+shape = SubResource("core_shape")
+
+[node name="CoreLight" type="PointLight2D" parent="Core"]
+color = Color(1, 0.22, 0.3, 1)
+energy = 1.4
+texture = ExtResource("5_cookie")
+texture_scale = 1.8
+
+[node name="Antenna" type="Area2D" parent="." groups=["boss_antenna"]]
+position = Vector2(28, -38)
+collision_layer = 4
+collision_mask = 8
+
+[node name="AntennaSprite" type="Sprite2D" parent="Antenna"]
+scale = Vector2(1.8, 1.8)
+texture = ExtResource("4_ant")
+
+[node name="AntennaShape" type="CollisionShape2D" parent="Antenna"]
+shape = SubResource("antenna_shape")
+
+[node name="AntennaLight" type="PointLight2D" parent="Antenna"]
+color = Color(1, 0.15, 0.15, 1)
+energy = 1.2
+texture = ExtResource("5_cookie")
+texture_scale = 0.8
+
+[node name="Inhibitor" type="Area2D" parent="." groups=["boss_inhibitor"]]
+position = Vector2(-36, 18)
+collision_layer = 0
+collision_mask = 2
+
+[node name="InhibitorShape" type="CollisionShape2D" parent="Inhibitor"]
+shape = SubResource("inhibitor_shape")
+
+[node name="InhibitorLight" type="PointLight2D" parent="Inhibitor"]
+color = Color(0.2, 0.85, 1, 1)
+energy = 0.8
+texture = ExtResource("5_cookie")
+texture_scale = 1.2
+
+[node name="Valves" type="Node2D" parent="."]
+
+[node name="Valve0" type="Area2D" parent="Valves"]
+position = Vector2(-36, -26)
+collision_layer = 4
+collision_mask = 8
+
+[node name="Shape" type="CollisionShape2D" parent="Valves/Valve0"]
+shape = SubResource("valve_shape")
+
+[node name="ValveLight" type="PointLight2D" parent="Valves/Valve0"]
+color = Color(1, 0.54, 0.21, 1)
+energy = 0.6
+texture = ExtResource("5_cookie")
+texture_scale = 0.7
+
+[node name="Valve1" type="Area2D" parent="Valves"]
+position = Vector2(0, -42)
+collision_layer = 4
+collision_mask = 8
+
+[node name="Shape" type="CollisionShape2D" parent="Valves/Valve1"]
+shape = SubResource("valve_shape")
+
+[node name="ValveLight" type="PointLight2D" parent="Valves/Valve1"]
+color = Color(1, 0.54, 0.21, 1)
+energy = 0.6
+texture = ExtResource("5_cookie")
+texture_scale = 0.7
+
+[node name="Valve2" type="Area2D" parent="Valves"]
+position = Vector2(36, -10)
+collision_layer = 4
+collision_mask = 8
+
+[node name="Shape" type="CollisionShape2D" parent="Valves/Valve2"]
+shape = SubResource("valve_shape")
+
+[node name="ValveLight" type="PointLight2D" parent="Valves/Valve2"]
+color = Color(1, 0.54, 0.21, 1)
+energy = 0.6
+texture = ExtResource("5_cookie")
+texture_scale = 0.7
+
+[node name="BossUI" type="CanvasLayer" parent="."]
+layer = 6
+
+[node name="Margin" type="MarginContainer" parent="BossUI"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -42.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="BossUI/Margin"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="BossUI/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="BossUI/Margin/VBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_bar_fill")
+show_percentage = false
+
+[node name="DecisionBox" type="VBoxContainer" parent="BossUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -140.0
+offset_right = 180.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="TimerBar" type="ProgressBar" parent="BossUI/DecisionBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_bar_fill")
+show_percentage = false
+
+[node name="HintLabel" type="Label" parent="BossUI/DecisionBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+
+[node name="SecretHint" type="Label" parent="BossUI/DecisionBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 7
+horizontal_alignment = 1

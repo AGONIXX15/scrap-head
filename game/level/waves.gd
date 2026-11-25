@@ -18,6 +18,7 @@ const SPARK := "res://game/enemies/chispa/chispa.tscn"
 const RIVETER := "res://game/enemies/remachadora/remachadora.tscn"
 const INTERIOR := [RIVETER]
 const PRESS := "res://game/enemies/prensa/prensa.tscn"
+const RECICLADORA := "res://game/enemies/recicladora/recicladora.tscn"
 const MUSIC_MAX_PITCH := 1.1
 const MUSIC_MIN_CUTOFF := 900.0
 const MUSIC_MAX_CUTOFF := 20000.0
@@ -124,7 +125,12 @@ func _play(i: int) -> void:
 	clock.hide()
 	for s in get_tree().get_nodes_in_group("spawn_warning"):
 		s.queue_free()
-	_show("¡OLEADA SUPERADA!", AMBER)
+
+	# En la oleada 5, aparece el jefe final: La Máquina Gigante (Recicladora)
+	if i == WAVES.size() - 1:
+		await _spawn_boss_encounter()
+
+	_show("¡OLEADA SUPERADA!" if i < WAVES.size() - 1 else "¡JEFE DERROTADO!", AMBER)
 	Sfx.play("wave_clear")
 	for e in enemies.get_children():
 		if is_instance_valid(e):
@@ -154,6 +160,36 @@ func _evolve_population() -> void:
 		next_generation.append(child_genome)
 	active_lineage = next_generation
 	population_history.clear()
+
+func _spawn_boss_encounter() -> void:
+	# Limpiar enemigos menores de la arena antes del enfrentamiento
+	for e in enemies.get_children():
+		if is_instance_valid(e):
+			e.sweep()
+	await _wait(1.0)
+	
+	_show("¡ALERTA: LA RECICLADORA!", Color("FF394D"))
+	Sfx.play("defeat")
+	Juice.shake(6.0)
+	await _wait(2.0)
+	
+	var boss_scene: PackedScene = load(RECICLADORA)
+	var boss: Recicladora = boss_scene.instantiate()
+	boss.global_position = ARENA / 2.0
+	enemies.add_child(boss)
+	
+	# Esperar resolución de la decisión del jefe (destruir, liberar, reventar o tercer camino)
+	var resolution: String = await boss.decision_resolved
+	match resolution:
+		"destruir":
+			_show("¡NÚCLEO DESTRUIDO!", Color("FF8A36"))
+		"liberar":
+			_show("¡RECICLADORA LIBERADA!", Color("36D9FF"))
+		"tercer_camino_nora":
+			_show("¡RADIO DE NORA RECUPERADA!", Color("B66CFF"))
+		"reventar":
+			_show("¡EL NÚCLEO EXPLOTÓ!", Color("FF394D"))
+	await _wait(2.5)
 
 func _spawn(wave: int) -> void:
 	if enemies.get_child_count() + get_tree().get_nodes_in_group("spawn_warning").size() >= _cap:
