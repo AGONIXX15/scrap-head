@@ -4,6 +4,7 @@ extends Node2D
 @export var sound := ""  # efecto de Sfx al aparecer (p. ej. "explosion")
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite")
+@onready var light: PointLight2D = get_node_or_null("Light")
 
 const MAX_FX := 40  # impactos/explosiones simultáneos
 
@@ -18,6 +19,9 @@ func _ready() -> void:
 	_live += 1
 	if sound:
 		Sfx.play(sound, global_position)
+	if light:
+		var tw := create_tween()
+		tw.tween_property(light, "energy", 0.0, life * 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tree_exited.connect(func(): _live -= 1)
 	get_tree().create_timer(life).timeout.connect(queue_free)
 

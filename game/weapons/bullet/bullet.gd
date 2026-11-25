@@ -40,6 +40,7 @@ var _target: Node2D
 var _search := 0.0
 
 @onready var sprite: Sprite2D = $Sprite
+@onready var light: PointLight2D = get_node_or_null("Light")
 
 func _ready() -> void:
 	live += 1
@@ -47,6 +48,13 @@ func _ready() -> void:
 	if is_disc:
 		sprite.texture = DISC_TEXTURE
 		sprite.hframes = 1
+	if light:
+		if effects.has("electrico") or effects.has("criogenico"):
+			light.color = Color("B66CFF") # Violeta energía / especial
+		elif effects.has("igneo") or effects.has("explosivo"):
+			light.color = Color("FF8A36") # Naranja fuego
+		else:
+			light.color = Color("36D9FF") # Cian energía / plasma estándar
 	rotation = direction.angle()
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)

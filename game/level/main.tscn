@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://game/level/decor/pipe_v.tscn" id="16"]
 [ext_resource type="PackedScene" path="res://game/level/decor/hazard_barrier.tscn" id="17"]
 [ext_resource type="PackedScene" path="res://game/level/decor/hazard_stripes.tscn" id="18"]
+[ext_resource type="Texture2D" path="res://game/shared/sprites/light_cookie.png" id="9_cookie"]
 
 [ext_resource type="Script" path="res://game/level/waves.gd" id="4"]
 [ext_resource type="AudioStream" path="res://game/level/audio/arena_music.ogg" id="music"]
@@ -47,6 +48,15 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id="vignette_mat"]
 shader = SubResource("vignette")
 
+[sub_resource type="Environment" id="env"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 0.6
+glow_strength = 0.95
+glow_bloom = 0.12
+glow_blend_mode = 0
+glow_hdr_threshold = 1.0
+
 [sub_resource type="RectangleShape2D" id="top"]
 size = Vector2(1480, 100)
 
@@ -55,8 +65,11 @@ size = Vector2(100, 920)
 
 [node name="Main" type="Node2D"]
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
 [node name="Ambient" type="CanvasModulate" parent="."]
-color = Color(0.82, 0.86, 0.97, 1)
+color = Color(0.48, 0.54, 0.64, 1)
 
 [node name="Floor" type="TileMapLayer" parent="."]
 tile_set = SubResource("tileset")
@@ -168,6 +181,36 @@ position = Vector2(230, 360)
 
 [node name="BarrierRight" parent="DecorObstacles" instance=ExtResource("17")]
 position = Vector2(1050, 360)
+
+[node name="AtmosphericLights" type="Node2D" parent="."]
+
+[node name="LightNorthLeft" type="PointLight2D" parent="AtmosphericLights"]
+position = Vector2(250, 60)
+color = Color(0.21, 0.85, 1.0, 1)
+energy = 0.65
+texture = ExtResource("9_cookie")
+texture_scale = 3.2
+
+[node name="LightNorthRight" type="PointLight2D" parent="AtmosphericLights"]
+position = Vector2(1030, 60)
+color = Color(0.21, 0.85, 1.0, 1)
+energy = 0.65
+texture = ExtResource("9_cookie")
+texture_scale = 3.2
+
+[node name="LightSouthLeft" type="PointLight2D" parent="AtmosphericLights"]
+position = Vector2(200, 640)
+color = Color(1.0, 0.54, 0.21, 1)
+energy = 0.55
+texture = ExtResource("9_cookie")
+texture_scale = 3.0
+
+[node name="LightSouthRight" type="PointLight2D" parent="AtmosphericLights"]
+position = Vector2(1080, 640)
+color = Color(1.0, 0.54, 0.21, 1)
+energy = 0.55
+texture = ExtResource("9_cookie")
+texture_scale = 3.0
 
 [node name="Player" parent="." instance=ExtResource("3")]
 position = Vector2(640, 360)

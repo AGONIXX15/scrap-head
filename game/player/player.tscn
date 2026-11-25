@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://game/player/sprites/arm_base.png" id="6"]
 [ext_resource type="Texture2D" path="res://game/player/sprites/muzzle.png" id="7"]
 [ext_resource type="Texture2D" path="res://game/player/sprites/head_base.png" id="8"]
+[ext_resource type="Texture2D" path="res://game/shared/sprites/light_cookie.png" id="9_cookie"]
 
 [sub_resource type="CircleShape2D" id="1"]
 radius = 8.0
@@ -93,6 +94,20 @@ color_ramp = SubResource("spark")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 4)
 shape = SubResource("1")
+
+[node name="PlayerLight" type="PointLight2D" parent="."]
+position = Vector2(0, 2)
+color = Color(0.21, 0.85, 1.0, 1)
+energy = 1.1
+texture = ExtResource("9_cookie")
+texture_scale = 2.4
+
+[node name="CoreLight" type="PointLight2D" parent="."]
+position = Vector2(0, 2)
+color = Color(0.21, 0.85, 1.0, 1)
+energy = 0.8
+texture = ExtResource("9_cookie")
+texture_scale = 0.8
 
 [node name="Camera2D" type="Camera2D" parent="."]
 limit_left = 0
