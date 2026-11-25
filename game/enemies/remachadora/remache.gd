@@ -8,6 +8,7 @@ const FRAME_DIST := 16.0
 
 var direction := Vector2.RIGHT
 var damage := 1
+var source_enemy: EnemyBase = null
 
 var _dist := 0.0
 
@@ -29,7 +30,10 @@ func _on_body_entered(body: Node) -> void:
 	if is_queued_for_deletion():
 		return
 	if body.is_in_group("player"):
+		var prev_hp: int = body.hp
 		body.take_damage(damage)
+		if is_instance_valid(source_enemy) and body.hp < prev_hp:
+			source_enemy.record_player_damage(prev_hp - body.hp)
 	var fx := IMPACT.instantiate()
 	fx.global_position = global_position
 	fx.rotation = direction.angle() + PI

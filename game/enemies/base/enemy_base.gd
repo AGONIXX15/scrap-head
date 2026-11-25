@@ -1,5 +1,7 @@
 class_name EnemyBase extends CharacterBody2D
 
+signal died_with_genes(species: String, genes: EnemyGenes)
+
 const EXPLOSION := preload("res://game/fx/explosion.tscn")
 const SCRAP := preload("res://game/parts/scrap/scrap.tscn")
 const KNOCKBACK := 140.0
@@ -41,12 +43,16 @@ const MARK_COLOR := Color(1.6, 0.6, 1.6)
 @onready var sprite: Sprite2D = $Sprite
 @onready var hitbox: Area2D = get_node_or_null("Hitbox")
 
+var genes: EnemyGenes
+var species_path := ""
+
 var _player: Node2D
 var _knock := Vector2.ZERO
 var _max_hp := 0
 var _tint := Color.WHITE
 var _bar := Node2D.new()
 var _warn := Node2D.new()
+var _accessory := Node2D.new()
 var _warn_radius := 0.0
 var _warn_fill := 0.0
 var _dead := false
@@ -60,19 +66,31 @@ var _flash_tween: Tween
 var _cold := 0.0
 var _mark := 0.0
 var mark_bonus := 0  # daño extra por golpe mientras está marcado (Marcador)
+var _alive_time := 0.0
 
 func _ready() -> void:
-	set_process(false)  # solo hace falta con quemadura o frío
+	if not genes:
+		genes = EnemyGenes.new()
+	if species_path.is_empty() and scene_file_path:
+		species_path = scene_file_path
+	
 	_player = get_tree().get_first_node_in_group("player")
+	
+	# Aplicar genes
+	_apply_genes()
+	
 	if elite:
 		hp *= ELITE_HP_MULT
 		scrap_value *= ELITE_SCRAP_MULT
-		scale = Vector2.ONE * ELITE_SCALE
-		_base_tint = ELITE_COLOR
+		scale = Vector2.ONE * ELITE_SCALE * genes.size
+		_base_tint = _base_tint * ELITE_COLOR
 		_tint = _base_tint
 		sprite.modulate = _tint
+	else:
+		scale = Vector2.ONE * genes.size
+	
 	_max_hp = hp
-	for n: Node2D in [_bar, _warn]:
+	for n: Node2D in [_bar, _warn, _accessory]:
 		n.scale = Vector2.ONE / scale
 		add_child(n)
 	_bar.z_index = 1
@@ -80,6 +98,63 @@ func _ready() -> void:
 	_bar.draw.connect(_draw_bar)
 	_warn.show_behind_parent = true
 	_warn.draw.connect(_draw_warn)
+	_accessory.z_index = 2
+	_accessory.draw.connect(_draw_accessory)
+	set_process(true)
+
+func _apply_genes() -> void:
+	speed *= genes.speed
+	hp = maxi(int(round(hp * genes.health)), 1)
+	
+	# Modulación de color visual según genes
+	# Velocidad -> tono amarillo/eléctrico
+	# Vida/Tamaño -> tono verdoso/reforzado
+	# Agresividad -> tono rojo/carmesí
+	var r := lerpf(1.0, 1.25, (genes.aggression - 0.7) / 0.8)
+	var g := lerpf(1.0, 1.2, (genes.health - 0.7) / 0.9)
+	var b := lerpf(1.0, 1.25, (genes.speed - 0.7) / 0.8)
+	_base_tint = Color(r, g, b)
+	_tint = _base_tint
+	sprite.modulate = _tint
+
+func _draw_accessory() -> void:
+	# Dibujar accesorios visuales según los genes:
+	# - Agresividad alta: pinchos metálicos/antenas
+	# - Velocidad alta: pequeños impulsores / aletas laterales
+	# - Ataque RAPID o HEAVY: marcas distintivas en la carcasa
+	if genes.aggression >= 1.25:
+		# Pinchos agresivos superiores
+		var spike_color := Color("ff3333")
+		_accessory.draw_line(Vector2(-8, -14), Vector2(-12, -22), spike_color, 2.0)
+		_accessory.draw_line(Vector2(8, -14), Vector2(12, -22), spike_color, 2.0)
+	elif genes.aggression <= 0.85:
+		# Antena redonda cautelosa
+		_accessory.draw_line(Vector2(0, -14), Vector2(0, -20), Color("88aaff"), 1.5)
+		_accessory.draw_circle(Vector2(0, -21), 2.0, Color("55ffff"))
+
+	if genes.speed >= 1.25:
+		# Aletas / turbinas laterales
+		var jet_color := Color("ffaa00")
+		_accessory.draw_colored_polygon(PackedVector2Array([
+			Vector2(-14, 0), Vector2(-18, -4), Vector2(-18, 4)
+		]), jet_color)
+		_accessory.draw_colored_polygon(PackedVector2Array([
+			Vector2(14, 0), Vector2(18, -4), Vector2(18, 4)
+		]), jet_color)
+
+	if genes.attack_type == EnemyGenes.AttackType.HEAVY:
+		# Cresta pesada reforzada
+		var crest_color := Color("ffcc00")
+		_accessory.draw_rect(Rect2(Vector2(-6, -18), Vector2(12, 4)), crest_color)
+	elif genes.attack_type == EnemyGenes.AttackType.RAPID:
+		# Indicador de ataque rápido (chevrons / flechas)
+		var chevron_color := Color("00ffcc")
+		_accessory.draw_line(Vector2(-5, -16), Vector2(0, -20), chevron_color, 2.0)
+		_accessory.draw_line(Vector2(5, -16), Vector2(0, -20), chevron_color, 2.0)
+
+func record_player_damage(amount: int) -> void:
+	if genes:
+		genes.damage_dealt += amount
 
 func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	if hp <= 0:
@@ -110,6 +185,9 @@ func _die(juice := true) -> void:
 	if _dead:
 		return
 	_dead = true
+	if genes:
+		genes.time_survived = _alive_time
+		died_with_genes.emit(species_path, genes)
 	set_physics_process(false)
 	_on_death()
 	var scene := get_tree().current_scene
@@ -157,6 +235,8 @@ func mark(n: int, duration := MARK_TIME) -> void:
 	_refresh_status()
 
 func _process(delta: float) -> void:
+	if not _dead:
+		_alive_time += delta
 	if _mark > 0.0:
 		_mark -= delta
 		if _mark <= 0.0:
@@ -174,8 +254,6 @@ func _process(delta: float) -> void:
 		_cold -= delta
 		if _cold <= 0.0:
 			_refresh_status()
-	if _burn <= 0.0 and _cold <= 0.0 and _mark <= 0.0:
-		set_process(false)
 
 func _oil_mult() -> float:
 	return _oil_factor if _oil_count > 0 else 1.0
@@ -197,7 +275,10 @@ func _on_death() -> void:
 func _touch() -> void:
 	for body in hitbox.get_overlapping_bodies():
 		if body.is_in_group("player"):
+			var prev_hp: int = body.hp
 			body.take_damage(damage)
+			if body.hp < prev_hp:
+				record_player_damage(prev_hp - body.hp)
 
 func _telegraph(radius: float, fill := 0.0) -> void:
 	_warn_radius = radius
