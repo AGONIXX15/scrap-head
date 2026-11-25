@@ -57,6 +57,10 @@ var _tween: Tween
 var _intensity := 0.0
 var _lowpass: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("Music"), 0)
 
+# Población evolutiva de enemigos (HU-20)
+var population_history: Array = []
+var active_lineage: Array = []
+
 @onready var music: AudioStreamPlayer = $"../Music"
 @onready var enemies: Node = $"../Enemies"
 @onready var player: Node2D = $"../Player"
@@ -126,6 +130,10 @@ func _play(i: int) -> void:
 		if is_instance_valid(e):
 			e.sweep()
 		await _wait(CHAIN_DELAY)
+	
+	# Entre oleadas se seleccionan los más aptos de la oleada actual, se cruzan y mutan
+	_evolve_population()
+	
 	wave_cleared.emit(i + 1)
 	if i < WAVES.size() - 1:
 		get_tree().call_group("scrap", "attract")
@@ -135,6 +143,17 @@ func _play(i: int) -> void:
 		workshop.wave = i + 1
 		add_child(workshop)
 		await workshop.closed
+
+func _evolve_population() -> void:
+	if population_history.is_empty():
+		return
+	# Generar nuevo linaje cruzando y mutando a los más aptos
+	var next_generation: Array = []
+	for n in 12: # pool de genomas evolucionados para la siguiente oleada
+		var child_genome := EnemyGenetics.select_and_breed(population_history)
+		next_generation.append(child_genome)
+	active_lineage = next_generation
+	population_history.clear()
 
 func _spawn(wave: int) -> void:
 	if enemies.get_child_count() + get_tree().get_nodes_in_group("spawn_warning").size() >= _cap:
@@ -149,6 +168,16 @@ func _spawn(wave: int) -> void:
 	if not interior and pos.distance_to(player.global_position) < MIN_DIST:
 		return
 	var e := scene.instantiate()
+	if e is EnemyBase:
+		if not active_lineage.is_empty():
+			# Asignar genoma evolucionado
+			e.genome = active_lineage.pick_random().duplicate(true)
+		elif wave > 1:
+			e.genome = EnemyGenetics.mutate(EnemyGenetics.create_default_genome())
+		
+		# Conectar registro de aptitud al morir
+		e.fitness_recorded.connect(_on_enemy_fitness_recorded)
+
 	if wave >= ELITE_FROM_WAVE and randf() < ELITE_CHANCE:
 		e.elite = true
 	var warn := WARNING.instantiate()
@@ -156,6 +185,9 @@ func _spawn(wave: int) -> void:
 	warn.enemy = e
 	warn.parent = enemies
 	add_child(warn)
+
+func _on_enemy_fitness_recorded(data: Dictionary) -> void:
+	population_history.append(data)
 
 func _pick() -> PackedScene:
 	var total := 0.0
