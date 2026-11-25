@@ -105,6 +105,7 @@ func _process(delta: float) -> void:
 			if _mines.size() < MAX_MINES and not _mines.any(func(m): return m.global_position.distance_to(pos) < MINE_GAP):
 				var m := MINE.instantiate()
 				m.global_position = pos
+				Sfx.play("mine_place", pos)
 				_mines.append(m)
 				get_tree().current_scene.add_child(m)
 	if _n.pisoton > 0:

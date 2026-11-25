@@ -1,6 +1,7 @@
 extends Node2D
 @export var life := 0.8
 @export var fps := 14.0
+@export var sound := ""  # efecto de Sfx al aparecer (p. ej. "explosion")
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite")
 
@@ -15,6 +16,8 @@ func _ready() -> void:
 		queue_free()
 		return
 	_live += 1
+	if sound:
+		Sfx.play(sound, global_position)
 	tree_exited.connect(func(): _live -= 1)
 	get_tree().create_timer(life).timeout.connect(queue_free)
 

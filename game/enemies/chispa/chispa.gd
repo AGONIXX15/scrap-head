@@ -33,8 +33,8 @@ func _physics_process(delta: float) -> void:
 	_knock = _knock.move_toward(Vector2.ZERO, KNOCK_DECAY * delta)
 	_beep += delta * lerpf(BEEP_HZ_NEAR, BEEP_HZ_FAR, clampf(dist / BEEP_RANGE, 0.0, 1.0))
 	var lit := int(_beep) % 2 == 0
-	if lit and not _lit:
-		pass  # SFX: beep
+	if lit and not _lit and dist < BEEP_RANGE:
+		Sfx.play("beep", global_position)
 	_lit = lit
 	light.energy = _light_energy if lit else _light_energy * LIGHT_DIM
 	if _fuse >= 0.0:
@@ -52,5 +52,5 @@ func _physics_process(delta: float) -> void:
 		velocity = dir.rotated(sin(_t * ZIG_FREQ + _phase) * ZIG_ANGLE) * (speed * speed_mult) + _knock
 		if dist < TRIGGER_DIST:
 			_fuse = FUSE_TIME
-			# SFX: charge
+			Sfx.play("charge", global_position, 1.3)
 	move_and_slide()

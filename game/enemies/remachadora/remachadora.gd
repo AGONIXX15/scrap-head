@@ -39,14 +39,14 @@ func _physics_process(delta: float) -> void:
 				_locked = false
 				barrel.frame = CHARGE_FRAME
 				laser.show()
-				# SFX: charge
+				Sfx.play("charge", global_position, 1.1)
 		State.CHARGE:
 			var k := 1.0 - _timer / CHARGE_TIME
 			if k < LOCK_FRAC:
 				barrel.rotation = lerp_angle(barrel.rotation, aim, AIM_TURN * delta)
 			elif not _locked:
 				_locked = true
-				# SFX: laser
+				Sfx.play("laser", global_position)
 			laser.width = lerpf(LASER_W_MIN, LASER_W_MAX, k)
 			laser.modulate.a = lerpf(LASER_ALPHA_MIN, 1.0, k)
 			if _timer <= 0.0:
@@ -65,7 +65,7 @@ func _physics_process(delta: float) -> void:
 					barrel.frame = IDLE_FRAME
 
 func _shoot() -> void:
-	# SFX: shoot
+	Sfx.play("rivet_shot", global_position)
 	var s := SHOT.instantiate()
 	s.direction = Vector2.from_angle(barrel.rotation)
 	s.global_position = barrel.global_position + s.direction * MUZZLE_DIST

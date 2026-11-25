@@ -45,7 +45,7 @@ func _physics_process(delta: float) -> void:
 				_timer = SLAM_WINDUP
 				_ram_tween = create_tween()
 				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, SLAM_WINDUP)
-				# SFX: charge
+				Sfx.play("charge", global_position, 0.7)
 		State.WINDUP:
 			_telegraph(SLAM_RADIUS, 1.0 - _timer / SLAM_WINDUP)
 			if _timer <= 0.0:
@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 		_touch()
 
 func _slam() -> void:
-	# SFX: slam
+	Sfx.play("slam", global_position)
 	_telegraph(0.0)
 	_state = State.RECOVER
 	_timer = SLAM_RECOVER

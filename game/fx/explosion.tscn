@@ -13,6 +13,7 @@ colors = PackedColorArray(0.66, 0.45, 0.25, 1, 0.24, 0.23, 0.3, 0.2)
 
 [node name="Explosion" type="Node2D"]
 script = ExtResource("1")
+sound = "explosion"
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("2")
