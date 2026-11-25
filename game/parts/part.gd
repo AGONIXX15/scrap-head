@@ -15,8 +15,10 @@ const FRAME_SIZE := 32
 @export var scene: PackedScene
 # Solo piezas generadas (ver PartGenerator); -1 = sin material
 @export var material := -1
+@export var secondary_material := -1 # Para piezas fusionadas con split visual de color
 @export var accessories: Array[Texture2D]
 @export var effects: Array[String]
+@export var pedigree: Dictionary = {} # Info de herencia y mutaciones para UI/inspección
 
 func frames() -> int:
 	return int(texture.get_width() / float(FRAME_SIZE))
