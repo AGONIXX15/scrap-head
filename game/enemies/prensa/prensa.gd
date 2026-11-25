@@ -29,6 +29,7 @@ func _ready() -> void:
 	_ram_home = ram.position.y
 
 func _physics_process(delta: float) -> void:
+	survival_time += delta
 	if not is_instance_valid(_player):
 		return
 	_knock = _knock.move_toward(Vector2.ZERO, KNOCK_DECAY * delta)
@@ -42,12 +43,12 @@ func _physics_process(delta: float) -> void:
 			sprite.frame = int(_t) % sprite.hframes
 			if _cooldown <= 0.0 and global_position.distance_to(_player.global_position) < SLAM_RANGE:
 				_state = State.WINDUP
-				_timer = SLAM_WINDUP
+				_timer = SLAM_WINDUP / aggression
 				_ram_tween = create_tween()
-				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, SLAM_WINDUP)
+				_ram_tween.tween_property(ram, "position:y", _ram_home - RAM_LIFT, _timer)
 				Sfx.play("charge", global_position, 0.7)
 		State.WINDUP:
-			_telegraph(SLAM_RADIUS, 1.0 - _timer / SLAM_WINDUP)
+			_telegraph(SLAM_RADIUS, 1.0 - _timer / (SLAM_WINDUP / aggression))
 			if _timer <= 0.0:
 				_slam()
 		State.RECOVER:
@@ -61,16 +62,21 @@ func _slam() -> void:
 	Sfx.play("slam", global_position)
 	_telegraph(0.0)
 	_state = State.RECOVER
-	_timer = SLAM_RECOVER
-	_cooldown = SLAM_COOLDOWN
+	_timer = SLAM_RECOVER / aggression
+	_cooldown = SLAM_COOLDOWN / aggression
 	if _ram_tween:
 		_ram_tween.kill()
 	_ram_tween = create_tween()
 	_ram_tween.tween_property(ram, "position:y", _ram_home + RAM_DROP, RAM_SLAM_TIME)
-	_ram_tween.tween_property(ram, "position:y", _ram_home, SLAM_RECOVER)
+	_ram_tween.tween_property(ram, "position:y", _ram_home, _timer)
 	Juice.shake(SLAM_SHAKE)
 	var dust := DUST.instantiate()
 	dust.global_position = global_position
 	get_tree().current_scene.add_child.call_deferred(dust)
 	if global_position.distance_to(_player.global_position) <= SLAM_RADIUS:
-		_player.take_damage(SLAM_DAMAGE)
+		var dmg: int = SLAM_DAMAGE + (1 if attack_type == "heavy" else 0)
+		var prev_hp: int = _player.hp if "hp" in _player else 0
+		_player.take_damage(dmg)
+		var cur_hp: int = _player.hp if "hp" in _player else 0
+		if prev_hp > cur_hp:
+			record_damage_dealt(prev_hp - cur_hp)

@@ -1,5 +1,7 @@
 class_name EnemyBase extends CharacterBody2D
 
+signal fitness_recorded(data: Dictionary)
+
 const EXPLOSION := preload("res://game/fx/explosion.tscn")
 const SCRAP := preload("res://game/parts/scrap/scrap.tscn")
 const KNOCKBACK := 140.0
@@ -38,6 +40,14 @@ const MARK_COLOR := Color(1.6, 0.6, 1.6)
 @export var fx_scale := 1.0
 @export var death_shake := 1.5
 
+# Genética y evolución (HU-20)
+var genome: Dictionary = {}
+var survival_time: float = 0.0
+var damage_dealt: int = 0
+var attack_type: String = "normal"
+var aggression: float = 1.0
+var _accessory_node: Sprite2D
+
 @onready var sprite: Sprite2D = $Sprite
 @onready var hitbox: Area2D = get_node_or_null("Hitbox")
 
@@ -62,13 +72,13 @@ var _mark := 0.0
 var mark_bonus := 0  # daño extra por golpe mientras está marcado (Marcador)
 
 func _ready() -> void:
-	set_process(false)  # solo hace falta con quemadura o frío
 	_player = get_tree().get_first_node_in_group("player")
+	_apply_genetics()
 	if elite:
 		hp *= ELITE_HP_MULT
 		scrap_value *= ELITE_SCRAP_MULT
-		scale = Vector2.ONE * ELITE_SCALE
-		_base_tint = ELITE_COLOR
+		scale *= ELITE_SCALE
+		_base_tint = _base_tint * ELITE_COLOR
 		_tint = _base_tint
 		sprite.modulate = _tint
 	_max_hp = hp
@@ -80,6 +90,47 @@ func _ready() -> void:
 	_bar.draw.connect(_draw_bar)
 	_warn.show_behind_parent = true
 	_warn.draw.connect(_draw_warn)
+
+func _apply_genetics() -> void:
+	if genome.is_empty():
+		genome = EnemyGenetics.create_default_genome(attack_type)
+	
+	# Aplicar genes
+	var speed_gene: float = genome.get("speed", 1.0)
+	var hp_gene: float = genome.get("hp", 1.0)
+	var size_gene: float = genome.get("size", 1.0)
+	aggression = genome.get("aggression", 1.0)
+	attack_type = genome.get("attack_type", "normal")
+	
+	speed *= speed_gene
+	hp = maxi(int(round(float(hp) * hp_gene)), 1)
+	scale *= size_gene
+	
+	# Color del genoma: variación visible de tono
+	var hue: float = genome.get("color_hue", 0.0)
+	if not is_zero_approx(hue):
+		var base_col := Color.from_hsv(hue, 0.45, 1.0)
+		_base_tint = base_col
+		_tint = _base_tint
+		sprite.modulate = _tint
+	
+	# Accesorio visual heredado / mutado
+	var acc_path: String = genome.get("accessory", "")
+	if not acc_path.is_empty() and ResourceLoader.exists(acc_path):
+		var acc_tex = load(acc_path)
+		if acc_tex is Texture2D:
+			_accessory_node = Sprite2D.new()
+			_accessory_node.texture = acc_tex
+			_accessory_node.position = Vector2(0, -6)
+			_accessory_node.use_parent_material = true
+			add_child(_accessory_node)
+
+func record_damage_dealt(amount: int) -> void:
+	damage_dealt += amount
+
+func get_fitness() -> float:
+	# Aptitud = daño hecho al jugador + tiempo sobrevivido
+	return float(damage_dealt) * 10.0 + survival_time
 
 func hit(amount: int, from_dir := Vector2.ZERO) -> void:
 	if hp <= 0:
@@ -110,6 +161,12 @@ func _die(juice := true) -> void:
 		return
 	_dead = true
 	set_physics_process(false)
+	fitness_recorded.emit({
+		"fitness": get_fitness(),
+		"genome": genome.duplicate(true),
+		"survival_time": survival_time,
+		"damage_dealt": damage_dealt
+	})
 	_on_death()
 	var scene := get_tree().current_scene
 	var fx := EXPLOSION.instantiate()
@@ -156,6 +213,9 @@ func mark(n: int, duration := MARK_TIME) -> void:
 	set_process(true)
 	_refresh_status()
 
+func _physics_process(delta: float) -> void:
+	survival_time += delta
+
 func _process(delta: float) -> void:
 	if _mark > 0.0:
 		_mark -= delta
@@ -197,7 +257,11 @@ func _on_death() -> void:
 func _touch() -> void:
 	for body in hitbox.get_overlapping_bodies():
 		if body.is_in_group("player"):
+			var prev_hp: int = body.hp if "hp" in body else 0
 			body.take_damage(damage)
+			var cur_hp: int = body.hp if "hp" in body else 0
+			if prev_hp > cur_hp:
+				record_damage_dealt(prev_hp - cur_hp)
 
 func _telegraph(radius: float, fill := 0.0) -> void:
 	_warn_radius = radius

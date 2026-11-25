@@ -32,6 +32,7 @@ func _ready() -> void:
 	_light_energy = light.energy
 
 func _physics_process(delta: float) -> void:
+	survival_time += delta
 	if _dead or not is_instance_valid(_player):
 		return
 	var dir := global_position.direction_to(_player.global_position)
@@ -44,9 +45,10 @@ func _physics_process(delta: float) -> void:
 			velocity += dir * (speed * speed_mult)
 			_t += delta * (WALK_FPS * speed_mult)
 			sprite.frame = int(_t) % sprite.hframes
-			if global_position.distance_to(_player.global_position) < LUNGE_RANGE:
+			var reach: float = LUNGE_RANGE * (1.2 if attack_type == "fast" else 1.0)
+			if global_position.distance_to(_player.global_position) < reach:
 				_state = State.WINDUP
-				_timer = WINDUP_TIME
+				_timer = WINDUP_TIME / aggression
 				Sfx.play("charge", global_position, 0.9)
 		State.WINDUP:
 			sprite.frame = OPEN_FRAME
@@ -55,14 +57,15 @@ func _physics_process(delta: float) -> void:
 			if _timer <= 0.0:
 				_lunge_dir = dir
 				_state = State.LUNGE
-				_timer = LUNGE_TIME
+				_timer = LUNGE_TIME * (1.2 if attack_type == "heavy" else 1.0)
 				sprite.position = Vector2.ZERO
 				_set_eye(true)
 		State.LUNGE:
-			velocity = _lunge_dir * (LUNGE_SPEED * speed_mult)
+			var l_speed: float = LUNGE_SPEED * (1.25 if attack_type == "fast" else 1.0)
+			velocity = _lunge_dir * (l_speed * speed_mult)
 			if _timer <= 0.0:
 				_state = State.RECOVER
-				_timer = RECOVER_TIME
+				_timer = RECOVER_TIME / aggression
 				sprite.frame = CLOSED_FRAME
 		State.RECOVER:
 			if _timer <= 0.0:

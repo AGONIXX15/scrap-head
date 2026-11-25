@@ -201,25 +201,36 @@ static func _roll_stats(slot: String, points: int, bias: String) -> Dictionary:
 		stats[k] = snappedf(v, 0.01) if v is float else v
 	return stats
 
-# Material de paleta de la pieza (null si no tiene); un ShaderMaterial por material.
-static func material_for(part: Part) -> ShaderMaterial:
-	if part.material < 0:
+# Material de paleta de la pieza (null si no tiene); un ShaderMaterial por material/combinación.
+static func material_for(part: Part, frame_count: float = 1.0) -> ShaderMaterial:
+	if part.material < 0 and part.secondary_material < 0:
 		return null
-	if not _materials.has(part.material):
+	var key := "%d_%d_%d" % [part.material, part.secondary_material, int(frame_count)]
+	if not _materials.has(key):
 		var m := ShaderMaterial.new()
 		m.shader = SHADER
-		var ramp: Array = MATERIALS[part.material].ramp
+		var mat_idx := maxi(part.material, 0)
+		var ramp: Array = MATERIALS[mat_idx].ramp
 		for i in ramp.size():
 			m.set_shader_parameter("c%d" % i, Color(ramp[i]))
-		_materials[part.material] = m
-	return _materials[part.material]
+		if part.secondary_material >= 0 and part.secondary_material != part.material:
+			m.set_shader_parameter("split", true)
+			m.set_shader_parameter("frame_count", frame_count)
+			var r_ramp: Array = MATERIALS[part.secondary_material].ramp
+			for i in r_ramp.size():
+				m.set_shader_parameter("r%d" % i, Color(r_ramp[i]))
+		else:
+			m.set_shader_parameter("split", false)
+		_materials[key] = m
+	return _materials[key]
 
 # Material y accesorios sobre una capa Sprite2D (part puede ser null: la deja limpia).
 static func dress(layer: Sprite2D, part: Part) -> void:
 	for c in layer.get_children().filter(func(n: Node): return n.is_in_group(ACC_GROUP)):
 		layer.remove_child(c)
 		c.queue_free()
-	layer.material = material_for(part) if part else null
+	var frames := float(part.frames()) if part else 1.0
+	layer.material = material_for(part, frames) if part else null
 	if not part:
 		return
 	for t in part.accessories:
@@ -234,7 +245,7 @@ static func dress_icon(icon: TextureRect, part: Part) -> void:
 	for c in icon.get_children():
 		icon.remove_child(c)
 		c.queue_free()
-	icon.material = material_for(part) if part else null
+	icon.material = material_for(part, 1.0) if part else null
 	if not part:
 		return
 	for t in part.accessories:
@@ -245,3 +256,201 @@ static func dress_icon(icon: TextureRect, part: Part) -> void:
 		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		r.use_parent_material = true
 		icon.add_child(r)
+
+# =========================================================================
+# FUSIÓN DE PIEZAS (HU-19: Cruce y Mutación)
+# =========================================================================
+
+const MUTATION_CHANCE_ACCESSORY := 0.35
+const MUTATION_CHANCE_EFFECT := 0.35
+const MUTATION_CHANCE_COLOR := 0.35
+
+# Resuelve la info de forma (Shape) para una pieza dada
+static func _find_shape_info(part: Part) -> Dictionary:
+	var list: Array = SHAPES.get(part.slot, [])
+	for s: Dictionary in list:
+		if s.tex == part.texture or (part.texture and s.tex and s.tex.resource_path == part.texture.resource_path):
+			return s
+	return {"name": part.name.split(" ")[0], "fem": false, "tex": part.texture}
+
+# Resuelve la info de un efecto por su ID
+static func _find_effect_info(slot: String, effect_id: String) -> Dictionary:
+	for e: Dictionary in EFFECTS.get(slot, []):
+		if e.id == effect_id:
+			return e
+	return {}
+
+# Fusiona dos piezas parent_a y parent_b de la misma ranura
+static func fuse(p_a: Part, p_b: Part) -> Part:
+	assert(p_a.slot == p_b.slot, "Solo se pueden fusionar piezas de la misma ranura")
+	var slot := p_a.slot
+	var child := Part.new()
+	child.slot = slot
+	child.rarity = clampi(maxi(p_a.rarity, p_b.rarity) + (1 if randf() < 0.35 else 0), 0, LEGENDARY)
+
+	var ped := {
+		"parent_a_name": p_a.name,
+		"parent_b_name": p_b.name,
+		"from_a": [],
+		"from_b": [],
+		"mutations": [],
+	}
+
+	# 1. FORMA: hereda de A o de B
+	var shape_from_a := randf() < 0.5
+	var shape_parent := p_a if shape_from_a else p_b
+	child.texture = shape_parent.texture
+	var shape_info := _find_shape_info(shape_parent)
+	if shape_from_a:
+		ped.from_a.append("Forma: %s" % shape_info.name)
+	else:
+		ped.from_b.append("Forma: %s" % shape_info.name)
+
+	# 2. MATERIAL Y COLOR (Primario de uno, Secundario del otro para split visual)
+	var mat_a := p_a.material if p_a.material >= 0 else randi() % MATERIALS.size()
+	var mat_b := p_b.material if p_b.material >= 0 else randi() % MATERIALS.size()
+	var mat_from_a := randf() < 0.5
+	var primary_mat := mat_a if mat_from_a else mat_b
+	var secondary_mat := mat_b if mat_from_a else mat_a
+
+	# Mutación de color
+	var mutated_color := false
+	if randf() < MUTATION_CHANCE_COLOR:
+		mutated_color = true
+		var new_mat := randi() % MATERIALS.size()
+		if randf() < 0.5:
+			primary_mat = new_mat
+		else:
+			secondary_mat = new_mat
+		ped.mutations.append("¡Color mutado a %s!" % MATERIALS[new_mat].name)
+
+	child.material = primary_mat
+	child.secondary_material = secondary_mat
+
+	if not mutated_color:
+		if mat_from_a:
+			ped.from_a.append("Color principal: %s" % MATERIALS[primary_mat].name)
+			if secondary_mat != primary_mat:
+				ped.from_b.append("Color secundario: %s" % MATERIALS[secondary_mat].name)
+		else:
+			ped.from_b.append("Color principal: %s" % MATERIALS[primary_mat].name)
+			if secondary_mat != primary_mat:
+				ped.from_a.append("Color secundario: %s" % MATERIALS[secondary_mat].name)
+
+	# 3. ACCESORIOS: combina de ambos padres sin duplicados
+	var combined_acc: Array[Texture2D] = []
+	for acc in p_a.accessories:
+		if acc and acc not in combined_acc:
+			combined_acc.append(acc)
+			ped.from_a.append("Accesorio (%s)" % acc.resource_path.get_file().get_basename().replace("acc_%s_" % slot, ""))
+	for acc in p_b.accessories:
+		if acc and acc not in combined_acc:
+			combined_acc.append(acc)
+			ped.from_b.append("Accesorio (%s)" % acc.resource_path.get_file().get_basename().replace("acc_%s_" % slot, ""))
+
+	# Mutación de accesorio
+	if randf() < MUTATION_CHANCE_ACCESSORY or combined_acc.is_empty():
+		var acc_names: Array = ACCESSORIES[slot]
+		var candidate_name: String = acc_names.pick_random()
+		var candidate_tex: Texture2D = load(ACC_PATH % [slot, candidate_name])
+		if candidate_tex not in combined_acc:
+			combined_acc.append(candidate_tex)
+			ped.mutations.append("¡Accesorio mutado: %s!" % candidate_name)
+
+	# Limitar accesorios al máximo permitido para la rareza hija
+	var max_acc: int = MAX_ACCESSORIES[child.rarity]
+	if combined_acc.size() > max_acc:
+		combined_acc.shuffle()
+		combined_acc = combined_acc.slice(0, max_acc)
+	child.accessories = combined_acc
+
+	# 4. EFECTOS: cruce de efectos de ambos padres
+	var combined_effects: Array[String] = []
+	for ef in p_a.effects:
+		if ef not in combined_effects:
+			combined_effects.append(ef)
+			ped.from_a.append("Efecto: %s" % ef.capitalize())
+	for ef in p_b.effects:
+		if ef not in combined_effects:
+			combined_effects.append(ef)
+			ped.from_b.append("Efecto: %s" % ef.capitalize())
+
+	# Mutación de efecto
+	if randf() < MUTATION_CHANCE_EFFECT:
+		var slot_effects: Array = EFFECTS[slot]
+		if not slot_effects.is_empty():
+			var mut_ef: Dictionary = slot_effects.pick_random()
+			if mut_ef.id not in combined_effects:
+				combined_effects.append(mut_ef.id)
+				ped.mutations.append("¡Efecto mutado: %s!" % mut_ef.adj)
+
+	# Limitar efectos según rareza hija
+	var max_ef := maxi(MAX_EFFECTS[child.rarity], 1)
+	if combined_effects.size() > max_ef:
+		combined_effects.shuffle()
+		combined_effects = combined_effects.slice(0, max_ef)
+	child.effects = combined_effects
+
+	# 5. STATS: toma el mejor de cada padre + 10% bono de fusión
+	var all_stat_keys := {}
+	for k in p_a.stats:
+		all_stat_keys[k] = true
+	for k in p_b.stats:
+		all_stat_keys[k] = true
+
+	var child_stats := {}
+	for k: String in all_stat_keys:
+		var val_a = float(p_a.stats.get(k, 0.0))
+		var val_b = float(p_b.stats.get(k, 0.0))
+		var is_better_lower := k in ["fire_rate"]
+		var best_val := mini(val_a, val_b) if is_better_lower else maxi(val_a, val_b)
+		var chosen: float = best_val
+		if is_better_lower:
+			chosen *= 0.92
+		else:
+			chosen = chosen * 1.1 + (1.0 if chosen == 0.0 else 0.0)
+		if STAT_COST.has(k) and STAT_COST[k][0] is int:
+			child_stats[k] = int(round(chosen))
+		else:
+			child_stats[k] = snappedf(chosen, 0.01)
+
+	# Incorporar stats directos de efectos
+	for ef_id in child.effects:
+		var ef_info := _find_effect_info(slot, ef_id)
+		if ef_info.has("scene"):
+			child.scene = ef_info.scene
+		for sk in ef_info.get("stats", {}):
+			if not child_stats.has(sk):
+				child_stats[sk] = ef_info.stats[sk]
+
+	child.stats = child_stats
+
+	# 6. NOMBRE Y DESCRIPCIÓN
+	var mat_name_p: String = MATERIALS[child.material].name
+	var mat_name_s: String = MATERIALS[child.secondary_material].name if child.secondary_material != child.material else ""
+	var mat_title := mat_name_p if mat_name_s.is_empty() else "%s-%s" % [mat_name_p, mat_name_s]
+
+	var first_effect_adj := ""
+	if not child.effects.is_empty():
+		var ef_info := _find_effect_info(slot, child.effects[0])
+		first_effect_adj = ef_info.get("adj_f" if shape_info.fem else "adj", ef_info.get("adj", ""))
+
+	child.name = "%s Quimera de %s" % [shape_info.name, mat_title]
+	if not first_effect_adj.is_empty():
+		child.name += " " + first_effect_adj
+
+	var descs: Array[String] = []
+	descs.append("Híbrido de %s y %s." % [p_a.name, p_b.name])
+	for ef_id in child.effects:
+		var ef_info := _find_effect_info(slot, ef_id)
+		if ef_info.has("desc"):
+			descs.append(ef_info.desc)
+	if not ped.mutations.is_empty():
+		descs.append(" ".join(ped.mutations))
+	else:
+		descs.append(MATERIALS[child.material].humor)
+
+	child.description = " ".join(descs)
+	child.pedigree = ped
+
+	return child

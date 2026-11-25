@@ -18,6 +18,7 @@ const SPARK := "res://game/enemies/chispa/chispa.tscn"
 const RIVETER := "res://game/enemies/remachadora/remachadora.tscn"
 const INTERIOR := [RIVETER]
 const PRESS := "res://game/enemies/prensa/prensa.tscn"
+const RECICLADORA := "res://game/enemies/recicladora/recicladora.tscn"
 const MUSIC_MAX_PITCH := 1.1
 const MUSIC_MIN_CUTOFF := 900.0
 const MUSIC_MAX_CUTOFF := 20000.0
@@ -56,6 +57,10 @@ var _left := 0.0
 var _tween: Tween
 var _intensity := 0.0
 var _lowpass: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("Music"), 0)
+
+# Población evolutiva de enemigos (HU-20)
+var population_history: Array = []
+var active_lineage: Array = []
 
 @onready var music: AudioStreamPlayer = $"../Music"
 @onready var enemies: Node = $"../Enemies"
@@ -120,12 +125,21 @@ func _play(i: int) -> void:
 	clock.hide()
 	for s in get_tree().get_nodes_in_group("spawn_warning"):
 		s.queue_free()
-	_show("¡OLEADA SUPERADA!", AMBER)
+
+	# En la oleada 5, aparece el jefe final: La Máquina Gigante (Recicladora)
+	if i == WAVES.size() - 1:
+		await _spawn_boss_encounter()
+
+	_show("¡OLEADA SUPERADA!" if i < WAVES.size() - 1 else "¡JEFE DERROTADO!", AMBER)
 	Sfx.play("wave_clear")
 	for e in enemies.get_children():
 		if is_instance_valid(e):
 			e.sweep()
 		await _wait(CHAIN_DELAY)
+	
+	# Entre oleadas se seleccionan los más aptos de la oleada actual, se cruzan y mutan
+	_evolve_population()
+	
 	wave_cleared.emit(i + 1)
 	if i < WAVES.size() - 1:
 		get_tree().call_group("scrap", "attract")
@@ -135,6 +149,47 @@ func _play(i: int) -> void:
 		workshop.wave = i + 1
 		add_child(workshop)
 		await workshop.closed
+
+func _evolve_population() -> void:
+	if population_history.is_empty():
+		return
+	# Generar nuevo linaje cruzando y mutando a los más aptos
+	var next_generation: Array = []
+	for n in 12: # pool de genomas evolucionados para la siguiente oleada
+		var child_genome := EnemyGenetics.select_and_breed(population_history)
+		next_generation.append(child_genome)
+	active_lineage = next_generation
+	population_history.clear()
+
+func _spawn_boss_encounter() -> void:
+	# Limpiar enemigos menores de la arena antes del enfrentamiento
+	for e in enemies.get_children():
+		if is_instance_valid(e):
+			e.sweep()
+	await _wait(1.0)
+	
+	_show("¡ALERTA: LA RECICLADORA!", Color("FF394D"))
+	Sfx.play("defeat")
+	Juice.shake(6.0)
+	await _wait(2.0)
+	
+	var boss_scene: PackedScene = load(RECICLADORA)
+	var boss: Recicladora = boss_scene.instantiate()
+	boss.global_position = ARENA / 2.0
+	enemies.add_child(boss)
+	
+	# Esperar resolución de la decisión del jefe (destruir, liberar, reventar o tercer camino)
+	var resolution: String = await boss.decision_resolved
+	match resolution:
+		"destruir":
+			_show("¡NÚCLEO DESTRUIDO!", Color("FF8A36"))
+		"liberar":
+			_show("¡RECICLADORA LIBERADA!", Color("36D9FF"))
+		"tercer_camino_nora":
+			_show("¡RADIO DE NORA RECUPERADA!", Color("B66CFF"))
+		"reventar":
+			_show("¡EL NÚCLEO EXPLOTÓ!", Color("FF394D"))
+	await _wait(2.5)
 
 func _spawn(wave: int) -> void:
 	if enemies.get_child_count() + get_tree().get_nodes_in_group("spawn_warning").size() >= _cap:
@@ -149,6 +204,16 @@ func _spawn(wave: int) -> void:
 	if not interior and pos.distance_to(player.global_position) < MIN_DIST:
 		return
 	var e := scene.instantiate()
+	if e is EnemyBase:
+		if not active_lineage.is_empty():
+			# Asignar genoma evolucionado
+			e.genome = active_lineage.pick_random().duplicate(true)
+		elif wave > 1:
+			e.genome = EnemyGenetics.mutate(EnemyGenetics.create_default_genome())
+		
+		# Conectar registro de aptitud al morir
+		e.fitness_recorded.connect(_on_enemy_fitness_recorded)
+
 	if wave >= ELITE_FROM_WAVE and randf() < ELITE_CHANCE:
 		e.elite = true
 	var warn := WARNING.instantiate()
@@ -156,6 +221,9 @@ func _spawn(wave: int) -> void:
 	warn.enemy = e
 	warn.parent = enemies
 	add_child(warn)
+
+func _on_enemy_fitness_recorded(data: Dictionary) -> void:
+	population_history.append(data)
 
 func _pick() -> PackedScene:
 	var total := 0.0

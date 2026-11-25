@@ -89,6 +89,8 @@ const VAMPIRE_KILLS := 12  # muertes por vida con una copia; baja 3 por copia ex
 @onready var dust: CPUParticles2D = $Dust
 @onready var sparks: CPUParticles2D = $Sparks
 @onready var collision: CollisionShape2D = $CollisionShape2D
+@onready var player_light: PointLight2D = get_node_or_null("PlayerLight")
+@onready var core_light: PointLight2D = get_node_or_null("CoreLight")
 @onready var layers := {Part.HEAD: head, Part.ARM: arm_sprite, Part.LEGS: legs, Part.BACK: back}
 
 var speed: float
@@ -128,6 +130,35 @@ func _ready() -> void:
 	hp_changed.emit(hp, max_hp)
 	parts_changed.emit(parts)
 	scrap_changed.emit(scrap)
+	_update_lighting()
+
+func _update_lighting() -> void:
+	if not player_light:
+		return
+	# Color de iluminación característico base: Cian (#36D9FF)
+	var base_light_color := Color("36D9FF")
+	var count := parts.size()
+	# Adapta la luz suavemente según las piezas equipadas
+	# Si tiene piezas de fuego/daño alto o plasma/habilidades legendarias, se tiñe sutilmente
+	var has_plasma := false
+	var has_fire := false
+	for p: Part in parts.values():
+		if p.effects.has("igneo") or p.effects.has("rastro_fuego"):
+			has_fire = true
+		if p.effects.has("electrico") or p.material == 6: # Plasma
+			has_plasma = true
+
+	var target_col := base_light_color
+	if has_plasma:
+		target_col = target_col.lerp(Color("B66CFF"), 0.35) # Violeta sci-fi
+	elif has_fire:
+		target_col = target_col.lerp(Color("FF8A36"), 0.3) # Naranja industrial
+	
+	player_light.color = target_col
+	player_light.energy = 1.0 + float(count) * 0.1
+	if core_light:
+		core_light.color = target_col
+		core_light.energy = 0.7 + float(count) * 0.08
 
 func _physics_process(delta: float) -> void:
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -216,6 +247,7 @@ func equip(part: Part) -> void:
 	hp = clampi(hp + max_hp - old_max, MIN_HP, max_hp)
 	hp_changed.emit(hp, max_hp)
 	torso.texture = BODIES[BODY_BY_PARTS[parts.size()]]
+	_update_lighting()
 	_flash()
 	_squash(EQUIP_SQUASH, EQUIP_SQUASH_TIME)
 	sparks.restart()
@@ -337,6 +369,10 @@ func _shoot(direction: Vector2) -> void:
 func _flash() -> void:
 	body.modulate = FLASH_COLOR
 	create_tween().tween_property(body, "modulate", Color.WHITE, FLASH_TIME)
+	if player_light:
+		var prev_energy := player_light.energy
+		player_light.energy = prev_energy * 2.2
+		create_tween().tween_property(player_light, "energy", prev_energy, FLASH_TIME * 1.5)
 
 func _squash(s: Vector2, t: float) -> void:
 	if _squash_tween:
